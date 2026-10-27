@@ -361,6 +361,16 @@ export const TechBriefBuilder: React.FC = () => {
 
   // Export to PDF
   const handleExportPdf = async () => {
+    if (briefData.pdfUrl) {
+      const a = document.createElement('a');
+      a.href = briefData.pdfUrl;
+      a.download = `${briefData.techId || 'Technology_Brief'}_${briefData.title.substring(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      return;
+    }
+
     try {
       setIsExporting(true);
       await exportBriefToPdf(briefData.techId, briefData.title);

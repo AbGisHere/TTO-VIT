@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { EMBEDDED_FONTS_CSS } from '../styles/embeddedFontsString';
 
 export const exportBriefToPdf = async (
   techId: string,
@@ -55,8 +56,10 @@ export const exportBriefToPdf = async (
 
       // html2canvas draws images via direct canvas drawImage, ensuring headers,
       // logos, and figures are 100% visible on all pages without browser sandbox blocks.
+      // onclone injects embedded base64 Montserrat & Plus Jakarta Sans fonts so
+      // all headings and titles are guaranteed to render in the exact Canva typography.
       const canvas = await html2canvas(pageEl, {
-        scale: 2.5,
+        scale: 2.8,
         useCORS: true,
         allowTaint: true,
         logging: false,
@@ -64,7 +67,12 @@ export const exportBriefToPdf = async (
         width: 893,
         height: 1263,
         windowWidth: 893,
-        windowHeight: 1263
+        windowHeight: 1263,
+        onclone: (clonedDoc) => {
+          const fontStyle = clonedDoc.createElement('style');
+          fontStyle.textContent = EMBEDDED_FONTS_CSS;
+          clonedDoc.head.appendChild(fontStyle);
+        }
       });
 
       const imgData = canvas.toDataURL('image/png');

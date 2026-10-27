@@ -98,7 +98,12 @@ export const TechBriefCatalog: React.FC = () => {
 
   const handleDownload = (brief: TechnologyBriefData) => {
     if (brief.pdfUrl) {
-      window.open(brief.pdfUrl, '_blank');
+      const a = document.createElement('a');
+      a.href = brief.pdfUrl;
+      a.download = `${brief.techId || 'Technology_Brief'}_${brief.title.substring(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
       return;
     }
 
@@ -325,7 +330,12 @@ export const TechBriefCatalog: React.FC = () => {
                 <button
                   onClick={() => {
                     if (selectedBriefForModal.pdfUrl) {
-                      window.open(selectedBriefForModal.pdfUrl, '_blank');
+                      const a = document.createElement('a');
+                      a.href = selectedBriefForModal.pdfUrl;
+                      a.download = `${selectedBriefForModal.techId || 'Technology_Brief'}_${selectedBriefForModal.title.substring(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+                      document.body.appendChild(a);
+                      a.click();
+                      document.body.removeChild(a);
                     } else {
                       exportBriefToPdf(selectedBriefForModal.techId, selectedBriefForModal.title);
                     }
@@ -334,7 +344,7 @@ export const TechBriefCatalog: React.FC = () => {
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold text-white bg-navy-900 hover:bg-navy-800 disabled:opacity-60 transition"
                 >
                   <Download className="w-3.5 h-3.5" />
-                  {isExporting ? 'Generating…' : (selectedBriefForModal.pdfUrl ? 'Open Stored PDF' : 'Download PDF')}
+                  {isExporting ? 'Generating…' : 'Download PDF'}
                 </button>
                 <button
                   onClick={() => setSelectedBriefForModal(null)}

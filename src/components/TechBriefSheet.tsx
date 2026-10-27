@@ -26,7 +26,7 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
           <ul className="space-y-1.5 text-[16px] leading-[23px] text-black font-['Arial',sans-serif] text-justify list-none p-0 m-0">
             {block.bulletPoints?.map((pt, i) => (
               <li key={i} className="flex items-start">
-                <span className="w-1.5 h-1.5 rounded-full bg-black mt-[9px] mr-2.5 shrink-0 inline-block" />
+                <span className="w-[4.5px] h-[4.5px] rounded-full bg-black mt-[9.5px] mr-2.5 shrink-0 inline-block" />
                 <div className="flex-1" dangerouslySetInnerHTML={{ __html: pt.replace(/\n/g, '<br/>') }} />
               </li>
             ))}
@@ -128,10 +128,11 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
       <div key={sec.id} className="flex flex-col w-full">
         {/* Section Heading in Canva Sans 14pt (Bold) ~ 18.6px Title Case */}
         <div
-          className="py-1 px-3 mb-1.5 text-center font-bold text-[18.6px] tracking-normal font-['Montserrat',sans-serif]"
+          className="py-1 px-3 mb-1.5 text-center font-bold text-[18.6px] tracking-normal"
           style={{
             backgroundColor: sec.headerBgColor || '#5ce1e6',
-            color: sec.headerTextColor || '#000000'
+            color: sec.headerTextColor || '#000000',
+            fontFamily: "'Montserrat', sans-serif"
           }}
         >
           {sec.title}
@@ -197,7 +198,10 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
               {p.pageNum === 1 && (
                 <div className="w-full pt-1">
                   <div className="flex flex-col items-center justify-center mb-1">
-                    <span className="bg-[#4f22c5] text-white font-bold text-[16px] tracking-wide px-7 py-1 uppercase font-['Montserrat',sans-serif]">
+                    <span
+                      className="bg-[#4f22c5] text-white font-bold text-[16px] tracking-wide px-7 py-1 uppercase"
+                      style={{ fontFamily: "'Montserrat', sans-serif" }}
+                    >
                       TECHNOLOGY BRIEF
                     </span>
                     <span className="text-[16px] font-medium text-black mt-1 font-['Arial',sans-serif]">
@@ -221,7 +225,10 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
                         backgroundColor: data.titleBannerBgColor || '#7ed957'
                       }}
                     >
-                      <h1 className="text-[25px] font-black italic tracking-tight text-black font-['Plus_Jakarta_Sans',sans-serif] leading-tight">
+                      <h1
+                        className="text-[25px] font-black italic tracking-tight text-black leading-tight"
+                        style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+                      >
                         {data.title || 'Technology Title'}
                       </h1>
                     </div>
@@ -263,7 +270,10 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
             {/* BOTTOM AREA: Footers */}
             <div className="w-full mt-auto">
               <div className="bg-[#5ce1e6] text-center py-2">
-                <span className="font-bold text-[18.6px] tracking-wide text-black font-['Montserrat',sans-serif]">
+                <span
+                  className="font-bold text-[18.6px] tracking-wide text-black"
+                  style={{ fontFamily: "'Montserrat', sans-serif" }}
+                >
                   Technology available for Licensing
                 </span>
               </div>
