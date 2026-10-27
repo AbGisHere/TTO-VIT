@@ -204,7 +204,7 @@ export const TechBriefBuilder: React.FC = () => {
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <span className="font-bold text-slate-900 text-lg flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-blue-600" />
+              <Sparkles className="w-5 h-5 text-gold-600" />
               Technology Brief Generator
             </span>
             <span className="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md border font-mono">
@@ -233,7 +233,7 @@ export const TechBriefBuilder: React.FC = () => {
             <button
               onClick={handleExportPdf}
               disabled={isExporting}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition shadow-xs disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-navy-900 hover:bg-navy-800 rounded-lg transition shadow-xs disabled:opacity-50"
             >
               <Download className="w-3.5 h-3.5" />
               {isExporting ? 'Generating PDF...' : 'Download PDF'}
@@ -373,7 +373,7 @@ export const TechBriefBuilder: React.FC = () => {
                 <div className="flex gap-2">
                   <button
                     onClick={() => addSection(1)}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 px-2.5 py-1.5 rounded-md transition"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-gold-600 bg-navy-50 hover:bg-blue-100 px-2.5 py-1.5 rounded-md transition"
                   >
                     <Plus className="w-3.5 h-3.5" /> Add to Page 1
                   </button>
@@ -422,7 +422,7 @@ export const TechBriefBuilder: React.FC = () => {
                         }
                         className={`text-[11px] font-semibold px-2 py-1 rounded border transition flex items-center gap-1 ${
                           sec.columnSpan === 2
-                            ? 'bg-blue-100 text-blue-700 border-blue-300'
+                            ? 'bg-blue-100 text-navy-800 border-navy-300'
                             : 'bg-white text-slate-600 border-slate-300'
                         }`}
                         title="Toggle Full Width vs Half Column"
@@ -490,7 +490,7 @@ export const TechBriefBuilder: React.FC = () => {
                                     nextPts[ptIdx] = e.target.value;
                                     updateBlock(sec.id, block.id, { bulletPoints: nextPts });
                                   }}
-                                  className="w-full text-xs border border-slate-200 rounded p-1.5 bg-white focus:outline-blue-500"
+                                  className="w-full text-xs border border-slate-200 rounded p-1.5 bg-white focus:outline-navy-700"
                                 />
                                 <button
                                   onClick={() => {
@@ -508,7 +508,7 @@ export const TechBriefBuilder: React.FC = () => {
                                 const nextPts = [...(block.bulletPoints || []), 'New bullet point...'];
                                 updateBlock(sec.id, block.id, { bulletPoints: nextPts });
                               }}
-                              className="text-xs text-blue-600 hover:underline font-medium inline-flex items-center gap-1"
+                              className="text-xs text-gold-600 hover:underline font-medium inline-flex items-center gap-1"
                             >
                               <Plus className="w-3 h-3" /> Add Bullet Item
                             </button>
@@ -523,7 +523,7 @@ export const TechBriefBuilder: React.FC = () => {
                             onChange={e =>
                               updateBlock(sec.id, block.id, { content: e.target.value })
                             }
-                            className="w-full text-xs border border-slate-200 rounded p-2 bg-white focus:outline-blue-500"
+                            className="w-full text-xs border border-slate-200 rounded p-2 bg-white focus:outline-navy-700"
                             placeholder="Enter paragraph text..."
                           />
                         )}
@@ -566,7 +566,7 @@ export const TechBriefBuilder: React.FC = () => {
                                       handleImageUpload(sec.id, block.id, e.target.files[0]);
                                     }
                                   }}
-                                  className="text-[11px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[11px] file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                  className="text-[11px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[11px] file:bg-navy-50 file:text-navy-800 hover:file:bg-blue-100"
                                 />
                               </div>
                             </div>
@@ -653,7 +653,7 @@ export const TechBriefBuilder: React.FC = () => {
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
-                  <Eye className="w-4 h-4 text-blue-600" />
+                  <Eye className="w-4 h-4 text-gold-600" />
                   Live A4 Document Preview
                 </span>
 
@@ -665,7 +665,7 @@ export const TechBriefBuilder: React.FC = () => {
                       onClick={() => setPreviewScale(s)}
                       className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${
                         previewScale === s
-                          ? 'bg-blue-600 text-white border-blue-600'
+                          ? 'bg-navy-900 text-white border-navy-600'
                           : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
                       }`}
                     >

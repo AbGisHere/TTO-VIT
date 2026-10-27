@@ -1,154 +1,118 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import {
-  FileText,
-  PlusCircle,
-  LogIn,
-  LogOut,
-  ShieldCheck,
-  UserCheck,
-  Building2,
-  Sparkles
-} from 'lucide-react';
+import { canSubmitToTto } from '../utils/access';
+import { LogIn, LogOut, FileText, ClipboardList, Lightbulb, PlusCircle } from 'lucide-react';
+import { UserRole } from '../types/technologyBrief';
+
+const roleLabel: Record<UserRole, string> = {
+  master_admin: 'Master Admin',
+  tb_admin: 'TB Admin',
+  faculty: 'VIT Faculty',
+  vit_student: 'VIT Student',
+  outside_user: 'Visitor'
+};
+
+const Avatar: React.FC<{ name: string; src?: string }> = ({ name, src }) => {
+  const [failed, setFailed] = useState(false);
+  if (src && !failed) {
+    return (
+      <img
+        src={src}
+        alt=""
+        referrerPolicy="no-referrer"
+        onError={() => setFailed(true)}
+        className="w-9 h-9 rounded-full object-cover ring-2 ring-navy-100"
+      />
+    );
+  }
+  return (
+    <div className="w-9 h-9 rounded-full bg-navy-900 text-gold-400 flex items-center justify-center font-display font-bold text-sm ring-2 ring-navy-100">
+      {name.charAt(0).toUpperCase()}
+    </div>
+  );
+};
 
 export const Navbar: React.FC = () => {
   const { user, signInWithGoogle, logout, isTbAdmin } = useAuth();
-  const location = useLocation();
+  const { pathname } = useLocation();
 
-  const getRoleBadge = () => {
-    if (!user) return null;
-    switch (user.role) {
-      case 'master_admin':
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-800 border border-purple-200">
-            <ShieldCheck className="w-3 h-3 text-purple-600" /> Master Admin
-          </span>
-        );
-      case 'tb_admin':
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
-            <Sparkles className="w-3 h-3 text-blue-600" /> TB Admin
-          </span>
-        );
-      case 'faculty':
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
-            <Building2 className="w-3 h-3 text-emerald-600" /> VIT Faculty
-          </span>
-        );
-      case 'vit_student':
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-cyan-100 text-cyan-800 border border-cyan-200">
-            <UserCheck className="w-3 h-3 text-cyan-600" /> VIT Student
-          </span>
-        );
-      default:
-        return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-            Outside User
-          </span>
-        );
-    }
-  };
+  const links = [
+    { to: '/tb', label: 'Technology Briefs', icon: FileText, show: true },
+    { to: '/problem-statements', label: 'Problem Statements', icon: ClipboardList, show: canSubmitToTto(user) },
+    { to: '/submit', label: 'Submit an Idea', icon: Lightbulb, show: canSubmitToTto(user) },
+    { to: '/upload-tb', label: 'Create Brief', icon: PlusCircle, show: isTbAdmin }
+  ].filter(l => l.show);
+
+  const linkClass = (to: string) =>
+    `relative flex items-center gap-2 px-3 py-2 text-sm font-medium whitespace-nowrap transition ${
+      pathname === to ? 'text-navy-700' : 'text-slate-600 hover:text-navy-700'
+    }`;
 
   return (
-    <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-xs print:hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          {/* Left Brand */}
-          <div className="flex items-center gap-8">
-            <Link to="/tb" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white font-black text-xl shadow-sm group-hover:bg-blue-700 transition">
-                TTO
-              </div>
-              <div>
-                <span className="text-base font-bold text-slate-900 block leading-tight">
-                  Technology Transfer Office
-                </span>
-                <span className="text-xs text-slate-500 block">
-                  VIT Vellore • IP & Commercialization
-                </span>
-              </div>
+    <header className="bg-white/90 backdrop-blur border-b border-navy-100 sticky top-0 z-50 print:hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[72px] flex items-center gap-6">
+        {/* Brand */}
+        <Link to="/" className="flex items-center gap-3 shrink-0">
+          <img src="/assets/branding/ipr_cell_logo.png" alt="IPR & TT Cell, VIT Vellore" className="h-11 w-auto" />
+          <span className="hidden sm:block leading-tight border-l border-navy-100 pl-3">
+            <span className="block font-display text-[17px] font-extrabold text-navy-700">Technology Transfer Office</span>
+            <span className="block text-[11px] tracking-wide text-slate-500">VIT Vellore · IP &amp; Commercialization</span>
+          </span>
+        </Link>
+
+        {/* Links */}
+        <nav className="hidden md:flex items-center ml-auto lg:ml-6 h-full">
+          {links.map(l => (
+            <Link key={l.to} to={l.to} className={`${linkClass(l.to)} h-full`}>
+              <l.icon className={`w-4 h-4 ${pathname === l.to ? 'text-gold-600' : ''}`} />
+              {l.label}
+              {pathname === l.to && <span className="absolute left-3 right-3 bottom-0 h-0.5 bg-gold-500 rounded-full" />}
             </Link>
+          ))}
+        </nav>
 
-            {/* Navigation Tabs */}
-            <div className="hidden md:flex items-center space-x-1">
-              <Link
-                to="/tb"
-                className={`px-3 py-2 rounded-md text-sm font-medium transition flex items-center gap-2 ${
-                  location.pathname === '/tb' || location.pathname === '/'
-                    ? 'bg-blue-50 text-blue-700'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                }`}
-              >
-                <FileText className="w-4 h-4" />
-                Technology Briefs
-              </Link>
-
-              {isTbAdmin && (
-                <Link
-                  to="/upload-tb"
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition flex items-center gap-2 ${
-                    location.pathname === '/upload-tb'
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                  }`}
-                >
-                  <PlusCircle className="w-4 h-4 text-blue-600" />
-                  Create Brief
-                </Link>
-              )}
-            </div>
-          </div>
-
-          {/* Right User Auth Controls */}
-          <div className="flex items-center gap-3">
-            {user ? (
-              <div className="flex items-center gap-3">
-                {getRoleBadge()}
-
-                <div className="text-right hidden sm:block">
-                  <p className="text-xs font-semibold text-slate-800 leading-none">
-                    {user.displayName}
-                  </p>
-                  <p className="text-[11px] text-slate-400 leading-tight">
-                    {user.email}
-                  </p>
-                </div>
-
-                {user.photoURL ? (
-                  <img
-                    src={user.photoURL}
-                    alt={user.displayName}
-                    className="w-8 h-8 rounded-full border border-slate-200"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-700 font-bold text-xs">
-                    {user.displayName.charAt(0).toUpperCase()}
-                  </div>
-                )}
-
-                <button
-                  onClick={logout}
-                  title="Sign out"
-                  className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md transition"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
+        {/* Account */}
+        <div className="ml-auto md:ml-0 lg:ml-auto flex items-center gap-3 shrink-0">
+          {user ? (
+            <>
+              <div className="hidden xl:block text-right leading-tight max-w-[14rem]">
+                <p className="text-sm font-semibold text-navy-900 truncate">{user.displayName}</p>
+                <p className="text-[11px] text-slate-500 truncate">{user.email}</p>
               </div>
-            ) : (
+              <span className="hidden sm:inline-block text-[11px] font-semibold tracking-wide text-navy-800 bg-navy-50 border border-navy-100 px-2.5 py-1 rounded-full">
+                {roleLabel[user.role]}
+              </span>
+              <Avatar name={user.displayName} src={user.photoURL} />
               <button
-                onClick={signInWithGoogle}
-                className="inline-flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition shadow-2xs"
+                onClick={logout}
+                title="Sign out"
+                className="p-2 text-slate-400 hover:text-navy-900 hover:bg-navy-50 rounded-full transition"
               >
-                <LogIn className="w-4 h-4 text-blue-600" />
-                Sign in with Google
+                <LogOut className="w-4 h-4" />
               </button>
-            )}
-          </div>
+            </>
+          ) : (
+            <button
+              onClick={() => signInWithGoogle().catch(() => undefined)}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-white bg-navy-700 hover:bg-navy-800 transition"
+            >
+              <LogIn className="w-4 h-4 text-gold-400" />
+              Sign in
+            </button>
+          )}
         </div>
       </div>
-    </nav>
+
+      {/* Mobile links */}
+      <nav className="md:hidden flex overflow-x-auto border-t border-navy-100 px-2">
+        {links.map(l => (
+          <Link key={l.to} to={l.to} className={linkClass(l.to)}>
+            <l.icon className="w-4 h-4" />
+            {l.label}
+          </Link>
+        ))}
+      </nav>
+    </header>
   );
 };

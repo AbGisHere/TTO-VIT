@@ -37,6 +37,7 @@ export interface TechnologyBriefData {
   techId: string; // e.g. "2024VITTTO73"
   title: string; // e.g. "Natural Vitamin B12 Fortification in Fermented Foods"
   titleBannerBgColor?: string; // default "#76cb3c" (institutional green)
+  summary?: string; // short public description shown to signed-out visitors
   domains: string[]; // e.g. ["Food Biotechnology", "Fermentation Microbiology"]
   applications: string[]; // e.g. ["Staple Batter Enrichment", "Bakery Products"]
   trlLevel: number; // 1 - 9
@@ -64,4 +65,19 @@ export interface AppUser {
   photoURL?: string;
   role: UserRole;
   domain: 'vitstudent' | 'vit' | 'outside';
+}
+
+export type SubmissionKind = 'idea' | 'problem_statement';
+
+export interface Submission {
+  id?: string;
+  kind: SubmissionKind;
+  title: string;
+  domain: string;
+  description: string;
+  problemStatementId?: string; // set when the idea responds to a listed industry problem statement
+  submittedByUid: string;
+  submittedByEmail: string;
+  submittedByName: string;
+  createdAt: string;
 }

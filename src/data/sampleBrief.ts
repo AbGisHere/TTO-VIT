@@ -223,7 +223,7 @@ export const sampleBriefData: TechnologyBriefData = {
           id: 'blk-val-1',
           type: 'bullets',
           bulletPoints: [
-            '<span style="color:#ff3131;font-weight:bold;">Ultra-Cost-Effective B12 Boost:</span> Enrich essential Vitamin B12 directly in food—no premium ingredients needed',
+            '<span style="color:#ff3131;font-weight:bold;">Ultra-Cost-Effective B12 Boost:</span> Enrich essential Vitamin B12 directly in food, no premium ingredients needed',
             '<span style="color:#ff3131;font-weight:bold;">Post-cooking B12 Retention:</span> 80% of Vitamin B12 is retained in the food even after cooking (steaming, frying, or baking)',
             '<span style="color:#ff3131;font-weight:bold;">Seamless Integration:</span> Mix additives in-situ during fermentation or pre-ferment blending',
             '<span style="color:#ff3131;font-weight:bold;">Ready-to-Sell Sachets:</span> Package B12-enriching pre-mixes for instant scalability'
