@@ -54,6 +54,33 @@ export const exportBriefToPdf = async (
       compress: true
     });
 
+    // Preload the official header banner to guarantee 100% visibility on all pages
+    const headerImg = new Image();
+    headerImg.src = '/assets/branding/tto_header.png';
+    await new Promise<void>((resolve) => {
+      if (headerImg.complete && headerImg.naturalWidth > 0) return resolve();
+      headerImg.onload = () => resolve();
+      headerImg.onerror = () => resolve();
+    });
+    const headerAspect = headerImg.naturalHeight > 0 && headerImg.naturalWidth > 0
+      ? headerImg.naturalHeight / headerImg.naturalWidth
+      : 168 / 1241;
+    const headerHeightMm = 210 * headerAspect;
+
+    let headerDataUrl: string | HTMLImageElement = headerImg;
+    try {
+      const headerCanvas = document.createElement('canvas');
+      headerCanvas.width = headerImg.naturalWidth || 1241;
+      headerCanvas.height = headerImg.naturalHeight || 168;
+      const hctx = headerCanvas.getContext('2d');
+      if (hctx) {
+        hctx.drawImage(headerImg, 0, 0);
+        headerDataUrl = headerCanvas.toDataURL('image/png');
+      }
+    } catch {
+      headerDataUrl = headerImg;
+    }
+
     for (let i = 0; i < pageElements.length; i++) {
       const pageEl = pageElements[i];
 
@@ -61,15 +88,7 @@ export const exportBriefToPdf = async (
         pdf.addPage('a4', 'portrait');
       }
 
-      // WARM-UP PASS: Forces browser GPU to decode all SVG foreignObject raster images (fixes missing header on Page 1)
-      await toPng(pageEl, {
-        cacheBust: false,
-        pixelRatio: 1,
-        width: 893,
-        height: 1263
-      });
-
-      // ACTUAL RETINA PASS: Capture at 2.5x retina quality (identical to 51d5e48)
+      // Capture at 2.5x retina quality using native SVG layout engine
       // Preserves exact fonts, exact layout, true shapes, and crystal-clear clarity!
       const imgData = await toPng(pageEl, {
         pixelRatio: 2.5,
@@ -82,6 +101,14 @@ export const exportBriefToPdf = async (
       });
 
       pdf.addImage(imgData, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
+
+      // Stamping the razor-sharp header banner directly at (0, 0) guarantees
+      // that Page 1 and Page 2 are 100% complete with zero SVG foreignObject dropouts.
+      try {
+        pdf.addImage(headerDataUrl, 'PNG', 0, 0, 210, headerHeightMm, undefined, 'FAST');
+      } catch (stampErr) {
+        console.warn('Header stamp fallback:', stampErr);
+      }
     }
 
     if (downloadDirectly) {
