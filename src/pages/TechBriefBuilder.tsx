@@ -359,21 +359,23 @@ export const TechBriefBuilder: React.FC = () => {
     }
   };
 
-  // Export to PDF
+  // Export to PDF: Always generates a fresh, crisp PDF directly from the current editor DOM,
+  // triggers instant download, and uploads/syncs to Firebase Storage
   const handleExportPdf = async () => {
-    if (briefData.pdfUrl) {
-      const a = document.createElement('a');
-      a.href = briefData.pdfUrl;
-      a.download = `${briefData.techId || 'Technology_Brief'}_${briefData.title.substring(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      return;
-    }
-
     try {
       setIsExporting(true);
-      await exportBriefToPdf(briefData.techId, briefData.title);
+      const pdfBlob = await exportBriefToPdf(briefData.techId, briefData.title, true);
+
+      // Asynchronously sync freshly generated PDF to Firebase Storage
+      try {
+        const fileName = `${briefData.techId || 'brief'}_${Date.now()}.pdf`;
+        const storageRef = ref(storage, `tech-briefs-pdf/${fileName}`);
+        await uploadBytes(storageRef, pdfBlob, { contentType: 'application/pdf' });
+        const storedPdfUrl = await getDownloadURL(storageRef);
+        setBriefData(prev => ({ ...prev, pdfUrl: storedPdfUrl }));
+      } catch (uploadErr) {
+        console.warn("Storage PDF auto-upload skipped:", uploadErr);
+      }
     } catch (err: any) {
       console.error("PDF generation failed:", err);
       alert("PDF generation error: " + err.message);

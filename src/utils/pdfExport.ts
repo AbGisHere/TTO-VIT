@@ -1,6 +1,5 @@
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
-import { EMBEDDED_FONTS_CSS } from '../styles/embeddedFontsString';
+import { toPng } from 'html-to-image';
 
 export const exportBriefToPdf = async (
   techId: string,
@@ -19,10 +18,18 @@ export const exportBriefToPdf = async (
   const images = Array.from(container.querySelectorAll('img'));
   await Promise.all(
     images.map(img => {
-      if (img.complete && img.naturalWidth > 0) return Promise.resolve();
-      return new Promise(resolve => {
-        img.onload = resolve;
-        img.onerror = resolve;
+      if (img.complete && img.naturalWidth > 0) {
+        return img.decode ? img.decode().catch(() => {}) : Promise.resolve();
+      }
+      return new Promise<void>(resolve => {
+        img.onload = () => {
+          if (img.decode) {
+            img.decode().then(() => resolve()).catch(() => resolve());
+          } else {
+            resolve();
+          }
+        };
+        img.onerror = () => resolve();
       });
     })
   );
@@ -32,7 +39,7 @@ export const exportBriefToPdf = async (
   container.style.transform = 'none';
 
   // Allow DOM to reflow at natural 100% scale
-  await new Promise(resolve => setTimeout(resolve, 200));
+  await new Promise(resolve => setTimeout(resolve, 300));
 
   try {
     const pageElements = document.querySelectorAll<HTMLElement>('.sheet-page');
@@ -54,28 +61,26 @@ export const exportBriefToPdf = async (
         pdf.addPage('a4', 'portrait');
       }
 
-      // html2canvas draws images via direct canvas drawImage, ensuring headers,
-      // logos, and figures are 100% visible on all pages without browser sandbox blocks.
-      // onclone injects embedded base64 Montserrat & Plus Jakarta Sans fonts so
-      // all headings and titles are guaranteed to render in the exact Canva typography.
-      const canvas = await html2canvas(pageEl, {
-        scale: 2.8,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
+      // WARM-UP PASS: Forces browser GPU to decode all SVG foreignObject raster images (fixes missing header on Page 1)
+      await toPng(pageEl, {
+        cacheBust: false,
+        pixelRatio: 1,
+        width: 893,
+        height: 1263
+      });
+
+      // ACTUAL RETINA PASS: Capture at 2.5x retina quality (identical to 51d5e48)
+      // Preserves exact fonts, exact layout, true shapes, and crystal-clear clarity!
+      const imgData = await toPng(pageEl, {
+        pixelRatio: 2.5,
         backgroundColor: '#ffffff',
         width: 893,
         height: 1263,
-        windowWidth: 893,
-        windowHeight: 1263,
-        onclone: (clonedDoc) => {
-          const fontStyle = clonedDoc.createElement('style');
-          fontStyle.textContent = EMBEDDED_FONTS_CSS;
-          clonedDoc.head.appendChild(fontStyle);
-        }
+        canvasWidth: 893 * 2.5,
+        canvasHeight: 1263 * 2.5,
+        cacheBust: false
       });
 
-      const imgData = canvas.toDataURL('image/png');
       pdf.addImage(imgData, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
     }
 
