@@ -208,13 +208,11 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
                   {/* Green Title Banner: Spans 100% full-width with peeking hexagon */}
                   <div className="w-full relative my-2 overflow-visible">
                     {/* Canva Teal Hexagon peeking symmetrically above and below the green bar on the left */}
-                    <svg
-                      className="absolute left-[36px] -top-[18px] w-[75px] h-[86px] pointer-events-none z-0"
-                      viewBox="0 0 100 115"
-                      preserveAspectRatio="none"
-                    >
-                      <polygon points="50,2 96,28 96,86 50,113 4,86 4,28" fill="#028fa1" />
-                    </svg>
+                    <img
+                      src="/assets/branding/hexagon_teal.png"
+                      alt=""
+                      className="absolute left-[36px] -top-[18px] w-[75px] h-[86px] pointer-events-none z-0 object-contain"
+                    />
 
                     {/* Green Bar spanning 100% of page width */}
                     <div

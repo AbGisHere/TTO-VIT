@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 
 export const exportBriefToPdf = async (
   techId: string,
@@ -14,7 +14,7 @@ export const exportBriefToPdf = async (
     throw new Error('No printable container found in document');
   }
 
-  // 2. Remove CSS scale transform during canvas capture so text kerning and geometry are 100% natural
+  // 2. Remove CSS scale transform during capture so metrics and typography are 100% natural
   const prevTransform = container.style.transform;
   container.style.transform = 'none';
 
@@ -41,20 +41,18 @@ export const exportBriefToPdf = async (
         pdf.addPage('a4', 'portrait');
       }
 
-      // Capture at ultra-crisp 2.5x resolution using PNG to eliminate any JPEG noise
-      const canvas = await html2canvas(pageEl, {
-        scale: 2.5,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
+      // html-to-image uses native browser SVG foreignObject engine:
+      // Preserves exact fonts, exact layout, true shapes, and crystal-clear clarity!
+      const imgData = await toPng(pageEl, {
+        pixelRatio: 2.5,
         backgroundColor: '#ffffff',
         width: 893,
         height: 1263,
-        windowWidth: 893,
-        windowHeight: 1263
+        canvasWidth: 893 * 2.5,
+        canvasHeight: 1263 * 2.5,
+        cacheBust: true
       });
 
-      const imgData = canvas.toDataURL('image/png');
       pdf.addImage(imgData, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
     }
 
