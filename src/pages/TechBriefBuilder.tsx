@@ -34,7 +34,7 @@ export const TechBriefBuilder: React.FC = () => {
 
   const [briefData, setBriefData] = useState<TechnologyBriefData>(sampleBriefData);
   const [activeTab, setActiveTab] = useState<'editor' | 'preview'>('editor');
-  const [previewScale, setPreviewScale] = useState<number>(0.65);
+  const [previewScale, setPreviewScale] = useState<number>(0.55);
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
@@ -659,7 +659,7 @@ export const TechBriefBuilder: React.FC = () => {
 
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] text-slate-400">Scale:</span>
-                  {[0.5, 0.65, 0.85, 1.0].map(s => (
+                  {[0.5, 0.55, 0.7, 0.85, 1.0].map(s => (
                     <button
                       key={s}
                       onClick={() => setPreviewScale(s)}

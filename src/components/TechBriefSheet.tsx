@@ -7,7 +7,6 @@ interface TechBriefSheetProps {
 }
 
 export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 }) => {
-  // Split sections by page
   const page1Sections = data.sections.filter(s => (s.page || 1) === 1);
   const page2Sections = data.sections.filter(s => s.page === 2);
   const additionalSections = data.sections.filter(s => (s.page || 1) > 2);
@@ -22,9 +21,9 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
     switch (block.type) {
       case 'bullets':
         return (
-          <ul className="list-disc pl-4 space-y-1 text-[11px] leading-tight text-slate-900 text-justify">
+          <ul className="list-disc pl-5 space-y-1 text-[15px] leading-[22px] text-black font-['Arial',sans-serif] text-justify" style={{ textAlignLast: 'left' }}>
             {block.bulletPoints?.map((pt, i) => (
-              <li key={i} className="pl-0.5">
+              <li key={i} className="pl-1">
                 <span dangerouslySetInnerHTML={{ __html: pt.replace(/\n/g, '<br/>') }} />
               </li>
             ))}
@@ -33,7 +32,7 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
 
       case 'text':
         return (
-          <div className="text-[11px] leading-tight text-slate-900 text-justify space-y-1.5 whitespace-pre-line">
+          <div className="text-[15px] leading-[22px] text-black font-['Arial',sans-serif] text-justify space-y-2 whitespace-pre-line" style={{ textAlignLast: 'left' }}>
             {block.content}
           </div>
         );
@@ -42,16 +41,16 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
       case 'text-with-image':
       case 'two-images':
         return (
-          <div className="space-y-1 my-0.5">
+          <div className="space-y-1 my-1">
             {block.title && (
-              <div className="text-center">
-                <span className="text-red-700 font-serif font-bold text-[11px] tracking-tight border-b-2 border-sky-600 pb-0.5 inline-block">
+              <div className="text-center my-0.5">
+                <span className="text-[#a51c1c] font-serif font-bold text-[15px] tracking-tight border-b-2 border-sky-600 pb-0.5 inline-block">
                   {block.title}
                 </span>
               </div>
             )}
             {block.content && (
-              <p className="text-[11px] text-justify leading-tight text-slate-800">{block.content}</p>
+              <p className="text-[14px] text-justify leading-[20px] text-black font-['Arial',sans-serif]">{block.content}</p>
             )}
             <div className="flex items-center justify-center gap-2">
               {block.imageUrl && (
@@ -59,7 +58,7 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
                   <img
                     src={block.imageUrl}
                     alt={block.title || 'Brief illustration'}
-                    className="max-h-24 w-auto object-contain rounded"
+                    className="max-h-28 w-auto object-contain rounded"
                   />
                 </div>
               )}
@@ -68,13 +67,13 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
                   <img
                     src={block.secondaryImageUrl}
                     alt="Secondary illustration"
-                    className="max-h-24 w-auto object-contain rounded"
+                    className="max-h-28 w-auto object-contain rounded"
                   />
                 </div>
               )}
             </div>
             {block.imageCaption && (
-              <p className="text-[9px] text-center text-slate-600 italic">{block.imageCaption}</p>
+              <p className="text-[11px] text-center text-slate-600 italic">{block.imageCaption}</p>
             )}
           </div>
         );
@@ -88,11 +87,11 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
     return (
       <div
         key={sec.id}
-        className={`flex flex-col mb-1.5 ${sec.columnSpan === 2 ? 'col-span-2' : 'col-span-1'}`}
+        className={`flex flex-col mb-2 ${sec.columnSpan === 2 ? 'col-span-2' : 'col-span-1'}`}
       >
-        {/* Section Header Bar */}
+        {/* Canva Section Header Bar */}
         <div
-          className="py-0.5 px-2 rounded-none mb-1 text-center font-bold text-[12px] uppercase tracking-wide shadow-xs"
+          className="py-1 px-3 mb-1.5 text-center font-bold text-[17px] uppercase tracking-wide font-['Montserrat',sans-serif]"
           style={{
             backgroundColor: sec.headerBgColor || '#52d1dc',
             color: sec.headerTextColor || '#000000'
@@ -101,8 +100,8 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
           {sec.title}
         </div>
 
-        {/* Section Blocks */}
-        <div className="space-y-1.5 px-0.5">
+        {/* Section Content */}
+        <div className="space-y-1.5 px-1">
           {sec.blocks.map(b => (
             <div key={b.id}>{renderBlock(b)}</div>
           ))}
@@ -113,7 +112,7 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
 
   return (
     <div
-      className="tech-brief-print-container flex flex-col items-center gap-8 py-4"
+      className="tech-brief-print-container flex flex-col items-center gap-10 py-6"
       style={{
         transform: scale !== 1 ? `scale(${scale})` : undefined,
         transformOrigin: 'top center'
@@ -123,12 +122,11 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
         <div
           key={p.pageNum}
           id={`tb-sheet-page-${p.pageNum}`}
-          className="sheet-page bg-white text-slate-900 shadow-2xl relative flex flex-col justify-between overflow-hidden"
+          className="sheet-page bg-white text-black shadow-2xl relative flex flex-col justify-between overflow-hidden"
           style={{
-            width: '210mm',
-            minHeight: '297mm',
-            height: '297mm',
-            padding: '0mm 0mm',
+            width: '893px',
+            minHeight: '1263px',
+            height: '1263px',
             boxSizing: 'border-box'
           }}
         >
@@ -145,25 +143,25 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
 
             {/* PAGE 1 ONLY: Tech Brief Banner & Title */}
             {p.pageNum === 1 && (
-              <div className="px-5 pt-1 pb-1">
+              <div className="px-8 pt-1 pb-1">
                 {/* Purple Badge & Tech ID */}
-                <div className="flex flex-col items-center justify-center my-0.5">
-                  <span className="bg-[#3b3598] text-white font-extrabold text-[12px] tracking-wider px-4 py-0.5 rounded-xs uppercase shadow-xs">
+                <div className="flex flex-col items-center justify-center my-1">
+                  <span className="bg-[#3b3598] text-white font-extrabold text-[18px] tracking-wider px-6 py-0.5 uppercase font-['Montserrat',sans-serif] shadow-xs">
                     TECHNOLOGY BRIEF
                   </span>
-                  <span className="text-[12px] font-bold text-slate-900 mt-0.5">
+                  <span className="text-[17px] font-bold text-black mt-1 font-['Plus_Jakarta_Sans',sans-serif]">
                     Technology ID: {data.techId || 'Pending'}
                   </span>
                 </div>
 
                 {/* Green Title Banner */}
                 <div
-                  className="w-full py-1 px-4 my-1 text-center relative overflow-hidden"
+                  className="w-full py-2 px-6 my-2 text-center relative overflow-hidden"
                   style={{
                     backgroundColor: data.titleBannerBgColor || '#76cb3c'
                   }}
                 >
-                  <h1 className="text-[17px] font-black italic tracking-tight text-slate-950 font-sans leading-tight">
+                  <h1 className="text-[25px] font-black italic tracking-tight text-black font-['Plus_Jakarta_Sans',sans-serif] leading-tight">
                     {data.title || 'Technology Title'}
                   </h1>
                 </div>
@@ -172,29 +170,29 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
           </div>
 
           {/* MAIN CONTENT AREA: Grid with newspaper alignment */}
-          <div className="flex-1 px-6 py-1 grid grid-cols-2 gap-x-5 gap-y-1 content-start">
+          <div className="flex-1 px-8 py-1 grid grid-cols-2 gap-x-8 gap-y-1 content-start">
             {p.sections.map(renderSection)}
           </div>
 
           {/* BOTTOM AREA: Footers */}
           <div className="w-full mt-auto">
             {/* Common Cyan Banner on all pages */}
-            <div className="bg-[#52d1dc] text-center py-1 border-t border-b border-cyan-400">
-              <span className="font-bold text-[12px] tracking-wide text-slate-950 uppercase">
+            <div className="bg-[#52d1dc] text-center py-1.5 border-t border-b border-cyan-400">
+              <span className="font-bold text-[17px] tracking-wide text-black uppercase font-['Montserrat',sans-serif]">
                 Technology available for Licensing
               </span>
             </div>
 
             {/* LAST PAGE ONLY: 3-Column Contact Box */}
             {p.isLast && (
-              <div className="px-6 py-2 bg-white">
-                <div className="grid grid-cols-12 gap-2 items-center text-[11px] leading-snug">
+              <div className="px-8 py-3 bg-white">
+                <div className="grid grid-cols-12 gap-3 items-center text-[15px] font-['Arial',sans-serif] leading-snug">
                   {/* Left Column: Officer Info */}
-                  <div className="col-span-5 bg-[#e4eefd] p-2 rounded border border-blue-100 h-full flex flex-col justify-center">
-                    <p className="font-bold text-slate-900">Contact:</p>
-                    <p className="font-semibold text-slate-800">{data.contactInfo.name}</p>
-                    <p className="text-slate-700">{data.contactInfo.title}</p>
-                    <p className="text-slate-600">{data.contactInfo.department}, {data.contactInfo.institution}</p>
+                  <div className="col-span-5 bg-[#e2edfd] p-3 rounded h-full flex flex-col justify-center">
+                    <p className="font-bold text-black">Contact:</p>
+                    <p className="font-bold text-black">{data.contactInfo.name}</p>
+                    <p className="text-black">{data.contactInfo.title}</p>
+                    <p className="text-black">{data.contactInfo.department}, {data.contactInfo.institution}</p>
                   </div>
 
                   {/* Center Column: IPR Logo */}
@@ -202,16 +200,16 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
                     <img
                       src="/assets/branding/ipr_cell_logo.png"
                       alt="IPR & TT Cell Logo"
-                      className="max-h-16 w-auto object-contain"
+                      className="max-h-20 w-auto object-contain"
                     />
                   </div>
 
                   {/* Right Column: Contact Details */}
-                  <div className="col-span-5 bg-[#e4eefd] p-2 rounded border border-blue-100 h-full flex flex-col justify-center">
-                    <p><span className="font-bold text-slate-900">Email:</span> <a href={`mailto:${data.contactInfo.email}`} className="text-blue-700 hover:underline">{data.contactInfo.email}</a></p>
-                    <p><span className="font-bold text-slate-900">Phone No.:</span> {data.contactInfo.phoneOffice} (O)</p>
-                    <p className="pl-14">: {data.contactInfo.phoneMobile} (M)</p>
-                    <p><span className="font-bold text-slate-900">Website:</span> <a href={data.contactInfo.website} target="_blank" rel="noreferrer" className="text-blue-700 hover:underline">{data.contactInfo.website}</a></p>
+                  <div className="col-span-5 bg-[#e2edfd] p-3 rounded h-full flex flex-col justify-center">
+                    <p><span className="font-bold text-black">Email:</span> <a href={`mailto:${data.contactInfo.email}`} className="text-blue-800 hover:underline">{data.contactInfo.email}</a></p>
+                    <p><span className="font-bold text-black">Phone No.:</span> {data.contactInfo.phoneOffice} (O)</p>
+                    <p className="pl-20">: {data.contactInfo.phoneMobile} (M)</p>
+                    <p><span className="font-bold text-black">Website:</span> <a href={data.contactInfo.website} target="_blank" rel="noreferrer" className="text-blue-800 hover:underline">{data.contactInfo.website}</a></p>
                   </div>
                 </div>
               </div>

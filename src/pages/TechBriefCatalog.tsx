@@ -268,7 +268,7 @@ export const TechBriefCatalog: React.FC = () => {
 
             {/* Modal Body with Sheet */}
             <div className="p-6 overflow-y-auto flex justify-center bg-slate-200">
-              <TechBriefSheet data={selectedBriefForModal} scale={0.8} />
+              <TechBriefSheet data={selectedBriefForModal} scale={0.7} />
             </div>
           </div>
         </div>

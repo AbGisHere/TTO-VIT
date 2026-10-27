@@ -23,11 +23,12 @@ export const exportBriefToPdf = async (techId: string, title: string): Promise<B
 
     // Render page canvas with high resolution
     const canvas = await html2canvas(pageEl, {
-      scale: 2.5,
+      scale: 2,
       useCORS: true,
       allowTaint: true,
       logging: false,
-      backgroundColor: '#ffffff'
+      backgroundColor: '#ffffff',
+      windowWidth: 1200
     });
 
     const imgData = canvas.toDataURL('image/jpeg', 0.95);

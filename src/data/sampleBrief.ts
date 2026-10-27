@@ -223,10 +223,10 @@ export const sampleBriefData: TechnologyBriefData = {
           id: 'blk-val-1',
           type: 'bullets',
           bulletPoints: [
-            '**<span class="text-red-600 font-semibold">Ultra-Cost-Effective B12 Boost:</span>** Enrich essential Vitamin B12 directly in food—no premium ingredients needed',
-            '**<span class="text-red-600 font-semibold">Post-cooking B12 Retention:</span>** 80% of Vitamin B12 is retained in the food even after cooking (steaming, frying, or baking)',
-            '**<span class="text-red-600 font-semibold">Seamless Integration:</span>** Mix additives in-situ during fermentation or pre-ferment blending',
-            '**<span class="text-red-600 font-semibold">Ready-to-Sell Sachets:</span>** Package B12-enriching pre-mixes for instant scalability'
+            '<span style="color:#ff3131;font-weight:bold;">Ultra-Cost-Effective B12 Boost:</span> Enrich essential Vitamin B12 directly in food—no premium ingredients needed',
+            '<span style="color:#ff3131;font-weight:bold;">Post-cooking B12 Retention:</span> 80% of Vitamin B12 is retained in the food even after cooking (steaming, frying, or baking)',
+            '<span style="color:#ff3131;font-weight:bold;">Seamless Integration:</span> Mix additives in-situ during fermentation or pre-ferment blending',
+            '<span style="color:#ff3131;font-weight:bold;">Ready-to-Sell Sachets:</span> Package B12-enriching pre-mixes for instant scalability'
           ]
         }
       ]
@@ -243,9 +243,9 @@ export const sampleBriefData: TechnologyBriefData = {
           id: 'blk-comp-1',
           type: 'bullets',
           bulletPoints: [
-            '**<span class="text-red-600 font-semibold">Superior bioavailability</span>** of Vitamin B12 when paired with food vs. pure supplements or injections',
-            '**<span class="text-red-600 font-semibold">Cost-effective alternative</span>** to pricey supplements or unavailable fortified foods, accessible to all societal sections',
-            '**<span class="text-red-600 font-semibold">Versatile for all ages:</span>** pregnant/lactating women, growing children, and aging populations with lifestyle diseases like diabetes and CVD'
+            '<span style="color:#ff3131;font-weight:bold;">Superior bioavailability</span> of Vitamin B12 when paired with food vs. pure supplements or injections',
+            '<span style="color:#ff3131;font-weight:bold;">Cost-effective alternative</span> to pricey supplements or unavailable fortified foods, accessible to all societal sections',
+            '<span style="color:#ff3131;font-weight:bold;">Versatile for all ages:</span> pregnant/lactating women, growing children, and aging populations with lifestyle diseases like diabetes and CVD'
           ]
         }
       ]
@@ -281,7 +281,7 @@ export const sampleBriefData: TechnologyBriefData = {
           id: 'blk-lab-1',
           type: 'bullets',
           bulletPoints: [
-            '**Dr. Krishnan Venkataraman**\nProfessor, Centre for Bio Separation Technology (CBST), VIT Vellore'
+            '<u style="font-weight:bold;">Dr. Krishnan Venkataraman</u><br/>Professor, Centre for Bio Separation Technology (CBST), VIT Vellore'
           ]
         }
       ]
