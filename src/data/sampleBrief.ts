@@ -100,13 +100,15 @@ export const sampleBriefData: TechnologyBriefData = {
           id: 'blk-res-1',
           type: 'image',
           imageUrl: '/assets/sample/curdled_milk_composite.png',
-          imageFit: 'width'
+          imageFit: 'contain',
+          placeholderHeight: 215
         },
         {
           id: 'blk-res-2',
           type: 'image',
           imageUrl: '/assets/sample/idly_dosa_composite.png',
-          imageFit: 'width'
+          imageFit: 'contain',
+          placeholderHeight: 215
         }
       ]
     },
@@ -178,13 +180,15 @@ export const sampleBriefData: TechnologyBriefData = {
           id: 'blk-res-p2-1',
           type: 'image',
           imageUrl: '/assets/sample/appam_composite.png',
-          imageFit: 'width'
+          imageFit: 'contain',
+          placeholderHeight: 215
         },
         {
           id: 'blk-res-p2-2',
           type: 'image',
           imageUrl: '/assets/sample/bread_composite.png',
-          imageFit: 'width'
+          imageFit: 'contain',
+          placeholderHeight: 215
         }
       ]
     },

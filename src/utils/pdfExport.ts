@@ -19,7 +19,7 @@ export const exportBriefToPdf = async (
   container.style.transform = 'none';
 
   // Allow DOM to reflow at natural 100% scale
-  await new Promise(resolve => setTimeout(resolve, 150));
+  await new Promise(resolve => setTimeout(resolve, 200));
 
   try {
     const pageElements = document.querySelectorAll<HTMLElement>('.sheet-page');
@@ -41,19 +41,21 @@ export const exportBriefToPdf = async (
         pdf.addPage('a4', 'portrait');
       }
 
-      // Capture at crisp 2x resolution
+      // Capture at ultra-crisp 2.5x resolution using PNG to eliminate any JPEG noise
       const canvas = await html2canvas(pageEl, {
-        scale: 2,
+        scale: 2.5,
         useCORS: true,
         allowTaint: true,
         logging: false,
         backgroundColor: '#ffffff',
         width: 893,
-        height: 1263
+        height: 1263,
+        windowWidth: 893,
+        windowHeight: 1263
       });
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.96);
-      pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+      const imgData = canvas.toDataURL('image/png');
+      pdf.addImage(imgData, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
     }
 
     if (downloadDirectly) {

@@ -23,7 +23,7 @@
     height: auto !important;
   }
 
-  .print\\:hidden, nav, header {
+  .print\:hidden, nav, header {
     display: none !important;
   }
 

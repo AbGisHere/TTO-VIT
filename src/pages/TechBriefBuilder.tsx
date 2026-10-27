@@ -148,10 +148,30 @@ export const TechBriefBuilder: React.FC = () => {
   // Clean default template without pre-filled text
   const [briefData, setBriefData] = useState<TechnologyBriefData>(defaultEmptyBriefData);
   const [previewScale, setPreviewScale] = useState<number>(0.55);
+  const previewContainerRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const handleFitWidth = () => {
+    if (previewContainerRef.current) {
+      const containerW = previewContainerRef.current.clientWidth - 48;
+      const calculated = Math.min(1.2, Math.max(0.3, containerW / 893));
+      setPreviewScale(Number(calculated.toFixed(2)));
+    }
+  };
+
+  const handleFitHeight = () => {
+    if (previewContainerRef.current) {
+      const containerH = previewContainerRef.current.clientHeight - 48;
+      const calculated = Math.min(1.2, Math.max(0.3, containerH / 1263));
+      setPreviewScale(Number(calculated.toFixed(2)));
+    } else {
+      const calculated = Math.min(1.2, Math.max(0.3, (window.innerHeight - 200) / 1263));
+      setPreviewScale(Number(calculated.toFixed(2)));
+    }
+  };
 
   // Drag and Drop States
   const [draggedSectionIndex, setDraggedSectionIndex] = useState<number | null>(null);
@@ -1064,32 +1084,64 @@ export const TechBriefBuilder: React.FC = () => {
           {/* Right Column: Live A4 Sheet Preview (6 cols) */}
           <div className="lg:col-span-6 sticky top-36">
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
                   <Eye className="w-4 h-4 text-gold-600" />
                   Live A4 Document Preview ({maxPage} {maxPage === 1 ? 'Page' : 'Pages'})
                 </span>
 
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] text-slate-400">Scale:</span>
-                  {[0.5, 0.55, 0.7, 0.85, 1.0].map(s => (
-                    <button
-                      key={s}
-                      onClick={() => setPreviewScale(s)}
-                      className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${
-                        previewScale === s
-                          ? 'bg-navy-900 text-white border-navy-600'
-                          : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-                      }`}
-                    >
-                      {Math.round(s * 100)}%
-                    </button>
-                  ))}
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={handleFitWidth}
+                    className="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition"
+                    title="Fit Page to Container Width"
+                  >
+                    Fit Width
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleFitHeight}
+                    className="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition"
+                    title="Fit Page to Viewport Height"
+                  >
+                    Fit Height
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewScale(prev => Math.max(0.3, Number((prev - 0.05).toFixed(2))))}
+                    className="text-xs font-bold px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300"
+                    title="Zoom Out"
+                  >
+                    -
+                  </button>
+                  <span className="text-[11px] font-mono font-semibold text-slate-700 min-w-10 text-center">
+                    {Math.round(previewScale * 100)}%
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewScale(prev => Math.min(1.5, Number((prev + 0.05).toFixed(2))))}
+                    className="text-xs font-bold px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300"
+                    title="Zoom In"
+                  >
+                    +
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewScale(1.0)}
+                    className="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300"
+                    title="Reset to 100% scale"
+                  >
+                    100%
+                  </button>
                 </div>
               </div>
 
               {/* Scrollable Container */}
-              <div className="max-h-[calc(100vh-12rem)] overflow-y-auto overflow-x-auto p-4 bg-slate-200/70 rounded-lg mt-3 flex justify-center">
+              <div
+                ref={previewContainerRef}
+                className="max-h-[calc(100vh-12rem)] overflow-y-auto overflow-x-auto p-4 bg-slate-200/70 rounded-lg mt-3 flex justify-center"
+              >
                 <TechBriefSheet data={briefData} scale={previewScale} />
               </div>
             </div>

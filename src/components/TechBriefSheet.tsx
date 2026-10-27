@@ -21,11 +21,13 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
     switch (block.type) {
       case 'bullets':
         return (
-          // Content in Arial MT Pro 12pt (16px, 22px line pitch, text-justify)
-          <ul className="list-disc pl-5 space-y-1.5 text-[16px] leading-[22px] text-black font-['Arial',sans-serif] text-justify">
+          // Content in Arial MT Pro 12pt (16px, 24px line pitch, text-justify)
+          // Uses explicit solid round bullet elements instead of CSS ::marker to ensure crisp circular bullets in all PDF engines
+          <ul className="space-y-1.5 text-[16px] leading-[24px] text-black font-['Arial',sans-serif] text-justify list-none p-0 m-0">
             {block.bulletPoints?.map((pt, i) => (
-              <li key={i} className="pl-0.5">
-                <span dangerouslySetInnerHTML={{ __html: pt.replace(/\n/g, '<br/>') }} />
+              <li key={i} className="flex items-start">
+                <span className="w-1.5 h-1.5 rounded-full bg-black mt-[9px] mr-2.5 shrink-0 inline-block" />
+                <div className="flex-1" dangerouslySetInnerHTML={{ __html: pt.replace(/\n/g, '<br/>') }} />
               </li>
             ))}
           </ul>
@@ -34,7 +36,7 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
       case 'text':
         return (
           <div
-            className="text-[16px] leading-[22px] text-black font-['Arial',sans-serif] text-justify space-y-2 whitespace-pre-line"
+            className="text-[16px] leading-[24px] text-black font-['Arial',sans-serif] text-justify space-y-2 whitespace-pre-line"
             dangerouslySetInnerHTML={{ __html: block.content || '' }}
           />
         );
@@ -85,7 +87,7 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
 
             {block.content && block.content.trim() !== '' && (
               <div
-                className="text-[16px] text-justify leading-[22px] text-black font-['Arial',sans-serif] mb-1.5"
+                className="text-[16px] text-justify leading-[24px] text-black font-['Arial',sans-serif] mb-1.5"
                 dangerouslySetInnerHTML={{ __html: block.content }}
               />
             )}
@@ -165,7 +167,7 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
         const leftSections = columnSections.filter(s => s.columnPosition === 'left' || (!s.columnPosition && columnSections.indexOf(s) % 2 === 0));
         const rightSections = columnSections.filter(s => s.columnPosition === 'right' || (!s.columnPosition && columnSections.indexOf(s) % 2 !== 0));
 
-        // Exact uniform vertical gap constants
+        // Exact uniform vertical gap constants matching Canva
         const sectionGapClass = p.pageNum === 1 ? 'space-y-[22px]' : 'space-y-[14px]';
         const interBlockGap = p.pageNum === 1 ? 'mt-[22px]' : 'mt-[14px]';
 

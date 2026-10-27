@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { db } from '../firebase/config';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
@@ -41,7 +41,28 @@ export const TechBriefCatalog: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDomain, setSelectedDomain] = useState('All');
   const [selectedBriefForModal, setSelectedBriefForModal] = useState<TechnologyBriefData | null>(null);
+  const [modalScale, setModalScale] = useState(0.7);
+  const modalContainerRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
+
+  const handleModalFitWidth = () => {
+    if (modalContainerRef.current) {
+      const containerW = modalContainerRef.current.clientWidth - 48;
+      const calculated = Math.min(1.2, Math.max(0.3, containerW / 893));
+      setModalScale(Number(calculated.toFixed(2)));
+    }
+  };
+
+  const handleModalFitHeight = () => {
+    if (modalContainerRef.current) {
+      const containerH = modalContainerRef.current.clientHeight - 48;
+      const calculated = Math.min(1.2, Math.max(0.3, containerH / 1263));
+      setModalScale(Number(calculated.toFixed(2)));
+    } else {
+      const calculated = Math.min(1.2, Math.max(0.3, (window.innerHeight - 200) / 1263));
+      setModalScale(Number(calculated.toFixed(2)));
+    }
+  };
 
   useEffect(() => {
     const fetchBriefs = async () => {
@@ -262,7 +283,45 @@ export const TechBriefCatalog: React.FC = () => {
                 <p className="font-mono text-[11px] text-gold-600 font-semibold">{selectedBriefForModal.techId}</p>
                 <h3 className="font-display font-semibold text-lg text-navy-900 truncate">{selectedBriefForModal.title}</h3>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
+                  <button
+                    type="button"
+                    onClick={handleModalFitWidth}
+                    className="text-[11px] font-semibold px-2 py-0.5 rounded bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs transition"
+                    title="Fit to Width"
+                  >
+                    Fit Width
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleModalFitHeight}
+                    className="text-[11px] font-semibold px-2 py-0.5 rounded bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs transition"
+                    title="Fit to Height"
+                  >
+                    Fit Height
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setModalScale(prev => Math.max(0.3, Number((prev - 0.05).toFixed(2))))}
+                    className="text-xs font-bold px-1.5 py-0.5 rounded bg-white hover:bg-slate-50 text-slate-700 border border-slate-200"
+                    title="Zoom Out"
+                  >
+                    -
+                  </button>
+                  <span className="text-[10px] font-mono font-semibold text-slate-700 min-w-9 text-center">
+                    {Math.round(modalScale * 100)}%
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setModalScale(prev => Math.min(1.5, Number((prev + 0.05).toFixed(2))))}
+                    className="text-xs font-bold px-1.5 py-0.5 rounded bg-white hover:bg-slate-50 text-slate-700 border border-slate-200"
+                    title="Zoom In"
+                  >
+                    +
+                  </button>
+                </div>
+
                 <button
                   onClick={() => {
                     if (selectedBriefForModal.pdfUrl) {
@@ -286,8 +345,8 @@ export const TechBriefCatalog: React.FC = () => {
                 </button>
               </div>
             </div>
-            <div className="p-6 overflow-y-auto flex justify-center bg-navy-50">
-              <TechBriefSheet data={selectedBriefForModal} scale={0.7} />
+            <div ref={modalContainerRef} className="p-6 overflow-y-auto flex justify-center bg-navy-50">
+              <TechBriefSheet data={selectedBriefForModal} scale={modalScale} />
             </div>
           </div>
         </div>
