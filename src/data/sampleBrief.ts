@@ -32,6 +32,7 @@ export const sampleBriefData: TechnologyBriefData = {
       headerBgColor: '#52d1dc',
       headerTextColor: '#000000',
       columnSpan: 1,
+      columnPosition: 'left',
       page: 1,
       blocks: [
         {
@@ -51,6 +52,7 @@ export const sampleBriefData: TechnologyBriefData = {
       headerBgColor: '#52d1dc',
       headerTextColor: '#000000',
       columnSpan: 1,
+      columnPosition: 'right',
       page: 1,
       blocks: [
         {
@@ -70,6 +72,7 @@ export const sampleBriefData: TechnologyBriefData = {
       headerBgColor: '#52d1dc',
       headerTextColor: '#000000',
       columnSpan: 1,
+      columnPosition: 'left',
       page: 1,
       blocks: [
         {
@@ -85,18 +88,23 @@ export const sampleBriefData: TechnologyBriefData = {
       ]
     },
     {
-      id: 'sec-results-1',
+      id: 'sec-results',
       title: 'Results',
       headerBgColor: '#52d1dc',
       headerTextColor: '#000000',
       columnSpan: 1,
+      columnPosition: 'right',
       page: 1,
       blocks: [
         {
           id: 'blk-res-1',
           type: 'image',
-          title: 'Synergistic Enhancement of Vitamin B12 in curdled milk',
           imageUrl: '/assets/sample/img-009.png'
+        },
+        {
+          id: 'blk-res-2',
+          type: 'image',
+          imageUrl: '/assets/sample/img-010.png'
         }
       ]
     },
@@ -106,6 +114,7 @@ export const sampleBriefData: TechnologyBriefData = {
       headerBgColor: '#52d1dc',
       headerTextColor: '#000000',
       columnSpan: 1,
+      columnPosition: 'left',
       page: 1,
       blocks: [
         {
@@ -116,22 +125,6 @@ export const sampleBriefData: TechnologyBriefData = {
             'Synergistic enhancement of Vitamin B12 level directly within food matrix during its natural fermentation process',
             'Novel approach ensuring Vit B12 availability in food avoiding need for supplements'
           ]
-        }
-      ]
-    },
-    {
-      id: 'sec-results-2',
-      title: 'Results (Cont.)',
-      headerBgColor: '#52d1dc',
-      headerTextColor: '#000000',
-      columnSpan: 1,
-      page: 1,
-      blocks: [
-        {
-          id: 'blk-res-2',
-          type: 'image',
-          title: 'Synergistic Enhancement of Vitamin B12 in Idly and Dosa batter',
-          imageUrl: '/assets/sample/img-010.png'
         }
       ]
     },
@@ -176,19 +169,38 @@ export const sampleBriefData: TechnologyBriefData = {
       headerBgColor: '#52d1dc',
       headerTextColor: '#000000',
       columnSpan: 1,
+      columnPosition: 'left',
       page: 2,
       blocks: [
         {
           id: 'blk-res-p2-1',
           type: 'image',
-          title: 'Synergistic Enhancement of Vitamin B12 in Appam batter',
           imageUrl: '/assets/sample/img-020.png'
         },
         {
           id: 'blk-res-p2-2',
           type: 'image',
-          title: 'Synergistic Enhancement of Vitamin B12 in bread',
           imageUrl: '/assets/sample/img-021.png'
+        }
+      ]
+    },
+    {
+      id: 'sec-comp-adv',
+      title: 'Competitive Advantage',
+      headerBgColor: '#52d1dc',
+      headerTextColor: '#000000',
+      columnSpan: 1,
+      columnPosition: 'left',
+      page: 2,
+      blocks: [
+        {
+          id: 'blk-comp-1',
+          type: 'bullets',
+          bulletPoints: [
+            '<span style="color:#ff3131;font-weight:bold;">Superior bioavailability</span> of Vitamin B12 when paired with food vs. pure supplements or injections',
+            '<span style="color:#ff3131;font-weight:bold;">Cost-effective alternative</span> to pricey supplements or unavailable fortified foods, accessible to all societal sections',
+            '<span style="color:#ff3131;font-weight:bold;">Versatile for all ages:</span> pregnant/lactating women, growing children, and aging populations with lifestyle diseases like diabetes and CVD'
+          ]
         }
       ]
     },
@@ -198,6 +210,7 @@ export const sampleBriefData: TechnologyBriefData = {
       headerBgColor: '#52d1dc',
       headerTextColor: '#000000',
       columnSpan: 1,
+      columnPosition: 'right',
       page: 2,
       blocks: [
         {
@@ -217,6 +230,7 @@ export const sampleBriefData: TechnologyBriefData = {
       headerBgColor: '#52d1dc',
       headerTextColor: '#000000',
       columnSpan: 1,
+      columnPosition: 'right',
       page: 2,
       blocks: [
         {
@@ -232,30 +246,12 @@ export const sampleBriefData: TechnologyBriefData = {
       ]
     },
     {
-      id: 'sec-comp-adv',
-      title: 'Competitive Advantage',
-      headerBgColor: '#52d1dc',
-      headerTextColor: '#000000',
-      columnSpan: 1,
-      page: 2,
-      blocks: [
-        {
-          id: 'blk-comp-1',
-          type: 'bullets',
-          bulletPoints: [
-            '<span style="color:#ff3131;font-weight:bold;">Superior bioavailability</span> of Vitamin B12 when paired with food vs. pure supplements or injections',
-            '<span style="color:#ff3131;font-weight:bold;">Cost-effective alternative</span> to pricey supplements or unavailable fortified foods, accessible to all societal sections',
-            '<span style="color:#ff3131;font-weight:bold;">Versatile for all ages:</span> pregnant/lactating women, growing children, and aging populations with lifestyle diseases like diabetes and CVD'
-          ]
-        }
-      ]
-    },
-    {
       id: 'sec-market',
       title: 'Market Potential',
       headerBgColor: '#52d1dc',
       headerTextColor: '#000000',
       columnSpan: 1,
+      columnPosition: 'right',
       page: 2,
       blocks: [
         {

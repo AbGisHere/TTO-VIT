@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { db, storage } from '../firebase/config';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { TechnologyBriefData, BriefSection, ContentBlock } from '../types/technologyBrief';
+import { defaultEmptyBriefData } from '../data/defaultBrief';
 import { sampleBriefData } from '../data/sampleBrief';
 import { TechBriefSheet } from '../components/TechBriefSheet';
 import { exportBriefToPdf, printBrief } from '../utils/pdfExport';
@@ -25,20 +26,125 @@ import {
   Sparkles,
   Eye,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  GripVertical,
+  Layers,
+  FileCode2
 } from 'lucide-react';
 
+// WYSIWYG Rich Bullet Item Editor with Instant Color & Bold Toolbar
+const RichBulletItem: React.FC<{
+  initialHtml: string;
+  onChange: (html: string) => void;
+  onRemove: () => void;
+}> = ({ initialHtml, onChange, onRemove }) => {
+  const editorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (editorRef.current && editorRef.current.innerHTML !== initialHtml) {
+      editorRef.current.innerHTML = initialHtml || '';
+    }
+  }, [initialHtml]);
+
+  const applyCommand = (command: string, value: string | undefined = undefined) => {
+    document.execCommand(command, false, value);
+    if (editorRef.current) {
+      onChange(editorRef.current.innerHTML);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-1 p-2 bg-white rounded-lg border border-slate-200 shadow-2xs group focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-400">
+      {/* Quick formatting toolbar */}
+      <div className="flex items-center gap-1.5 pb-1 border-b border-slate-100 text-xs">
+        <button
+          type="button"
+          onMouseDown={(e) => { e.preventDefault(); applyCommand('bold'); }}
+          className="px-2 py-0.5 rounded font-bold hover:bg-slate-100 border text-slate-800"
+          title="Bold selected text"
+        >
+          B
+        </button>
+        <button
+          type="button"
+          onMouseDown={(e) => { e.preventDefault(); applyCommand('underline'); }}
+          className="px-2 py-0.5 rounded underline hover:bg-slate-100 border text-slate-800"
+          title="Underline selected text"
+        >
+          <u>U</u>
+        </button>
+        <button
+          type="button"
+          onMouseDown={(e) => { e.preventDefault(); applyCommand('foreColor', '#ff3131'); }}
+          className="px-2 py-0.5 rounded font-bold hover:bg-red-50 border border-red-200 text-[#ff3131] flex items-center gap-1"
+          title="Turn selected text RED (#ff3131)"
+        >
+          <span className="w-2.5 h-2.5 rounded-full bg-[#ff3131]" /> Red
+        </button>
+        <button
+          type="button"
+          onMouseDown={(e) => { e.preventDefault(); applyCommand('foreColor', '#0284c7'); }}
+          className="px-2 py-0.5 rounded font-bold hover:bg-sky-50 border border-sky-200 text-[#0284c7] flex items-center gap-1"
+          title="Turn selected text Blue"
+        >
+          <span className="w-2.5 h-2.5 rounded-full bg-[#0284c7]" /> Blue
+        </button>
+        <button
+          type="button"
+          onMouseDown={(e) => { e.preventDefault(); applyCommand('foreColor', '#000000'); }}
+          className="px-2 py-0.5 rounded font-bold hover:bg-slate-100 border text-black"
+          title="Reset to black text"
+        >
+          Black
+        </button>
+        <span className="text-[10px] text-slate-400 ml-auto italic">Select text & click color</span>
+      </div>
+
+      <div className="flex items-start gap-2">
+        <span className="text-slate-500 font-bold text-sm mt-0.5">•</span>
+        <div
+          ref={editorRef}
+          contentEditable
+          suppressContentEditableWarning
+          onInput={() => {
+            if (editorRef.current) {
+              onChange(editorRef.current.innerHTML);
+            }
+          }}
+          className="flex-1 min-h-[36px] text-xs leading-relaxed focus:outline-none bg-slate-50/50 p-1.5 rounded text-black"
+        />
+        <button
+          type="button"
+          onClick={onRemove}
+          className="text-slate-300 hover:text-red-500 p-1 text-base font-bold leading-none"
+          title="Remove bullet item"
+        >
+          &times;
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export const TechBriefBuilder: React.FC = () => {
-  const { user, isTbAdmin } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [briefData, setBriefData] = useState<TechnologyBriefData>(sampleBriefData);
-  const [activeTab, setActiveTab] = useState<'editor' | 'preview'>('editor');
+  // Clean default template without pre-filled text
+  const [briefData, setBriefData] = useState<TechnologyBriefData>(defaultEmptyBriefData);
   const [previewScale, setPreviewScale] = useState<number>(0.55);
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Drag and Drop States
+  const [draggedSectionIndex, setDraggedSectionIndex] = useState<number | null>(null);
+  const [draggedBlockInfo, setDraggedBlockInfo] = useState<{ secId: string; blockIndex: number } | null>(null);
+
+  // Max page currently in brief
+  const maxPage = Math.max(1, ...briefData.sections.map(s => s.page || 1));
+  const availablePages = Array.from({ length: Math.max(maxPage, 2) }, (_, i) => i + 1);
 
   // Field change handlers
   const handleBasicChange = (field: keyof TechnologyBriefData, value: any) => {
@@ -55,7 +161,7 @@ export const TechBriefBuilder: React.FC = () => {
     }));
   };
 
-  // Section handlers
+  // Section Management
   const updateSection = (secId: string, updates: Partial<BriefSection>) => {
     setBriefData(prev => ({
       ...prev,
@@ -70,19 +176,20 @@ export const TechBriefBuilder: React.FC = () => {
     }));
   };
 
-  const addSection = (page: 1 | 2 = 1) => {
+  const addSection = (pageNumber: number = 1) => {
     const newSec: BriefSection = {
       id: `sec-${Date.now()}`,
       title: 'New Section',
       headerBgColor: '#52d1dc',
       headerTextColor: '#000000',
       columnSpan: 1,
-      page,
+      columnPosition: 'left',
+      page: pageNumber,
       blocks: [
         {
           id: `blk-${Date.now()}`,
-          type: 'text',
-          content: 'Enter section content here...'
+          type: 'bullets',
+          bulletPoints: ['']
         }
       ]
     };
@@ -92,14 +199,38 @@ export const TechBriefBuilder: React.FC = () => {
     }));
   };
 
-  // Block handlers
+  const moveSection = (index: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= briefData.sections.length) return;
+
+    const updated = [...briefData.sections];
+    const [moved] = updated.splice(index, 1);
+    updated.splice(targetIndex, 0, moved);
+    setBriefData(prev => ({ ...prev, sections: updated }));
+  };
+
+  // Drag & drop for sections
+  const handleSectionDragStart = (index: number) => {
+    setDraggedSectionIndex(index);
+  };
+
+  const handleSectionDrop = (targetIndex: number) => {
+    if (draggedSectionIndex === null || draggedSectionIndex === targetIndex) return;
+    const updated = [...briefData.sections];
+    const [moved] = updated.splice(draggedSectionIndex, 1);
+    updated.splice(targetIndex, 0, moved);
+    setBriefData(prev => ({ ...prev, sections: updated }));
+    setDraggedSectionIndex(null);
+  };
+
+  // Block Management
   const addBlockToSection = (secId: string, type: ContentBlock['type']) => {
     const newBlock: ContentBlock = {
       id: `blk-${Date.now()}`,
       type,
-      ...(type === 'bullets' ? { bulletPoints: ['New bullet item'] } : {}),
-      ...(type === 'text' ? { content: 'Text paragraph...' } : {}),
-      ...(type === 'image' ? { title: 'Figure Title', imageUrl: '' } : {})
+      ...(type === 'bullets' ? { bulletPoints: [''] } : {}),
+      ...(type === 'text' ? { content: '' } : {}),
+      ...(type === 'image' ? { title: '', imageUrl: '' } : {})
     };
 
     setBriefData(prev => ({
@@ -134,6 +265,36 @@ export const TechBriefBuilder: React.FC = () => {
         };
       })
     }));
+  };
+
+  const moveBlock = (secId: string, blockIndex: number, direction: 'up' | 'down') => {
+    const sec = briefData.sections.find(s => s.id === secId);
+    if (!sec) return;
+    const targetIndex = direction === 'up' ? blockIndex - 1 : blockIndex + 1;
+    if (targetIndex < 0 || targetIndex >= sec.blocks.length) return;
+
+    const updatedBlocks = [...sec.blocks];
+    const [moved] = updatedBlocks.splice(blockIndex, 1);
+    updatedBlocks.splice(targetIndex, 0, moved);
+
+    updateSection(secId, { blocks: updatedBlocks });
+  };
+
+  const handleBlockDragStart = (secId: string, blockIndex: number) => {
+    setDraggedBlockInfo({ secId, blockIndex });
+  };
+
+  const handleBlockDrop = (secId: string, targetBlockIndex: number) => {
+    if (!draggedBlockInfo || draggedBlockInfo.secId !== secId) return;
+    const sec = briefData.sections.find(s => s.id === secId);
+    if (!sec) return;
+
+    const updatedBlocks = [...sec.blocks];
+    const [moved] = updatedBlocks.splice(draggedBlockInfo.blockIndex, 1);
+    updatedBlocks.splice(targetBlockIndex, 0, moved);
+
+    updateSection(secId, { blocks: updatedBlocks });
+    setDraggedBlockInfo(null);
   };
 
   // Image Upload Handler
@@ -183,7 +344,7 @@ export const TechBriefBuilder: React.FC = () => {
       setErrorMessage(null);
       await addDoc(collection(db, 'technology_briefs'), {
         ...briefData,
-        createdByEmail: user?.email || 'admin@vit.ac.in',
+        createdByEmail: user?.email || 'abg.592006@gmail.com',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
@@ -198,7 +359,7 @@ export const TechBriefBuilder: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 pb-16">
+    <div className="min-h-screen bg-slate-100 pb-20">
       {/* Top Action Bar */}
       <div className="bg-white border-b border-slate-200 sticky top-16 z-40 px-4 sm:px-8 py-3 shadow-2xs">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
@@ -208,35 +369,50 @@ export const TechBriefBuilder: React.FC = () => {
               Technology Brief Generator
             </span>
             <span className="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md border font-mono">
-              {briefData.techId}
+              {briefData.techId || 'Draft ID'}
+            </span>
+            <span className="text-xs bg-navy-50 text-navy-800 px-2 py-0.5 rounded border border-blue-200 font-medium">
+              {maxPage} {maxPage === 1 ? 'Page' : 'Pages'}
             </span>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => setBriefData(sampleBriefData)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition"
-              title="Reset to official B12 Fortification template"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-lg transition"
+              title="Populate fields with B12 Vitamin sample data"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
-              Reset Template
+              <FileCode2 className="w-3.5 h-3.5 text-purple-600" />
+              Load Sample B12
             </button>
 
             <button
-              onClick={printBrief}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition shadow-2xs"
+              onClick={() => setBriefData(defaultEmptyBriefData)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition"
+              title="Reset to blank institutional headings"
             >
-              <Printer className="w-3.5 h-3.5" />
-              Print
+              <RotateCcw className="w-3.5 h-3.5" />
+              Clear Fields
             </button>
 
+            {/* Vector Native Print / Save to PDF */}
+            <button
+              onClick={printBrief}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-800 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg transition shadow-2xs"
+              title="Print or Save as Vector PDF (Native Chrome / Safari quality)"
+            >
+              <Printer className="w-3.5 h-3.5 text-gold-600" />
+              Print / Save PDF (Vector)
+            </button>
+
+            {/* Direct Download PDF */}
             <button
               onClick={handleExportPdf}
               disabled={isExporting}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-navy-900 hover:bg-navy-800 rounded-lg transition shadow-xs disabled:opacity-50"
             >
               <Download className="w-3.5 h-3.5" />
-              {isExporting ? 'Generating PDF...' : 'Download PDF'}
+              {isExporting ? 'Generating...' : 'Direct Download'}
             </button>
 
             <button
@@ -276,9 +452,9 @@ export const TechBriefBuilder: React.FC = () => {
       {/* Main Workspace (Editor + Live Preview Split) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Left Column: Editor Form (7 cols) */}
+          {/* Left Column: Form Editor (6 cols) */}
           <div className="lg:col-span-6 space-y-6">
-            {/* 1. Header & Metadata Card */}
+            {/* 1. Header & Identifiers Card */}
             <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
               <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
                 1. Brief Identifiers & Title
@@ -364,24 +540,31 @@ export const TechBriefBuilder: React.FC = () => {
               </div>
             </div>
 
-            {/* 2. Sections Manager */}
+            {/* 2. Sections Manager with Drag & Reorder */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500">
-                  2. Content Sections & Blocks
-                </h2>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                    <Layers className="w-4 h-4 text-gold-600" />
+                    2. Sections & Reorderable Blocks
+                  </h2>
+                  <span className="text-[11px] text-slate-400">
+                    Use Drag handles or arrows to reorder • Select text to turn Red or Bold
+                  </span>
+                </div>
+
                 <div className="flex gap-2">
                   <button
                     onClick={() => addSection(1)}
                     className="inline-flex items-center gap-1 text-xs font-semibold text-gold-600 bg-navy-50 hover:bg-blue-100 px-2.5 py-1.5 rounded-md transition"
                   >
-                    <Plus className="w-3.5 h-3.5" /> Add to Page 1
+                    <Plus className="w-3.5 h-3.5" /> Add Section
                   </button>
                   <button
-                    onClick={() => addSection(2)}
+                    onClick={() => addSection(maxPage + 1)}
                     className="inline-flex items-center gap-1 text-xs font-semibold text-purple-600 bg-purple-50 hover:bg-purple-100 px-2.5 py-1.5 rounded-md transition"
                   >
-                    <Plus className="w-3.5 h-3.5" /> Add to Page 2
+                    <Plus className="w-3.5 h-3.5" /> Add Page {maxPage + 1}
                   </button>
                 </div>
               </div>
@@ -389,17 +572,55 @@ export const TechBriefBuilder: React.FC = () => {
               {briefData.sections.map((sec, secIdx) => (
                 <div
                   key={sec.id}
-                  className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-2xs"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={() => handleSectionDrop(secIdx)}
+                  className={`bg-white rounded-xl border border-slate-200 overflow-hidden shadow-2xs transition ${
+                    draggedSectionIndex === secIdx ? 'opacity-50 ring-2 ring-blue-500' : ''
+                  }`}
                 >
                   {/* Section Top Header Edit Bar */}
                   <div className="p-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-2 flex-1">
+                      {/* Section Drag Handle (ONLY this handle is draggable) */}
+                      <div
+                        draggable
+                        onDragStart={(e) => {
+                          e.stopPropagation();
+                          handleSectionDragStart(secIdx);
+                        }}
+                        className="cursor-grab active:cursor-grabbing p-1.5 text-slate-400 hover:text-slate-700 bg-white hover:bg-slate-200 rounded border border-slate-200 shadow-2xs"
+                        title="Drag to reorder section"
+                      >
+                        <GripVertical className="w-4 h-4" />
+                      </div>
+
+                      {/* Section Up / Down Buttons */}
+                      <div className="flex flex-col -space-y-1">
+                        <button
+                          type="button"
+                          disabled={secIdx === 0}
+                          onClick={() => moveSection(secIdx, 'up')}
+                          className="text-slate-400 hover:text-gold-600 disabled:opacity-20"
+                        >
+                          <ChevronUp className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={secIdx === briefData.sections.length - 1}
+                          onClick={() => moveSection(secIdx, 'down')}
+                          className="text-slate-400 hover:text-gold-600 disabled:opacity-20"
+                        >
+                          <ChevronDown className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
                       <span className="text-xs font-bold text-slate-400">#{secIdx + 1}</span>
                       <input
                         type="text"
                         value={sec.title}
                         onChange={e => updateSection(sec.id, { title: e.target.value })}
                         className="font-bold text-xs uppercase px-2 py-1 border border-slate-300 rounded bg-white flex-1"
+                        placeholder="Section Heading..."
                       />
                     </div>
 
@@ -415,32 +636,36 @@ export const TechBriefBuilder: React.FC = () => {
                         />
                       </div>
 
-                      {/* Width toggle */}
-                      <button
-                        onClick={() =>
-                          updateSection(sec.id, { columnSpan: sec.columnSpan === 1 ? 2 : 1 })
-                        }
-                        className={`text-[11px] font-semibold px-2 py-1 rounded border transition flex items-center gap-1 ${
-                          sec.columnSpan === 2
-                            ? 'bg-blue-100 text-navy-800 border-navy-300'
-                            : 'bg-white text-slate-600 border-slate-300'
-                        }`}
-                        title="Toggle Full Width vs Half Column"
+                      {/* Column Position Selector (Left, Right, or Full Width) */}
+                      <select
+                        value={sec.columnSpan === 2 ? 'full' : (sec.columnPosition || 'left')}
+                        onChange={e => {
+                          const val = e.target.value;
+                          if (val === 'full') {
+                            updateSection(sec.id, { columnSpan: 2 });
+                          } else {
+                            updateSection(sec.id, { columnSpan: 1, columnPosition: val as 'left' | 'right' });
+                          }
+                        }}
+                        className="text-[11px] font-semibold border border-slate-300 rounded px-2 py-1 bg-white text-slate-700"
+                        title="Position on page"
                       >
-                        <Columns className="w-3 h-3" />
-                        {sec.columnSpan === 2 ? 'Full Width' : 'Half Col'}
-                      </button>
+                        <option value="left">Left Column</option>
+                        <option value="right">Right Column</option>
+                        <option value="full">Full Width</option>
+                      </select>
 
                       {/* Page selector */}
                       <select
                         value={sec.page || 1}
                         onChange={e =>
-                          updateSection(sec.id, { page: parseInt(e.target.value) as 1 | 2 })
+                          updateSection(sec.id, { page: parseInt(e.target.value) || 1 })
                         }
                         className="text-[11px] font-medium border border-slate-300 rounded px-1.5 py-1 bg-white text-slate-700"
                       >
-                        <option value={1}>Page 1</option>
-                        <option value={2}>Page 2</option>
+                        {availablePages.map(p => (
+                          <option key={p} value={p}>Page {p}</option>
+                        ))}
                       </select>
 
                       {/* Delete section */}
@@ -454,61 +679,94 @@ export const TechBriefBuilder: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Blocks inside Section */}
+                  {/* Blocks inside Section (Reorderable) */}
                   <div className="p-4 space-y-3">
-                    {sec.blocks.map(block => (
+                    {sec.blocks.map((block, bIdx) => (
                       <div
                         key={block.id}
-                        className="p-3 bg-slate-50/70 rounded-lg border border-slate-200/80 space-y-2"
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={() => handleBlockDrop(sec.id, bIdx)}
+                        className={`p-3 bg-slate-50/70 rounded-lg border border-slate-200/80 space-y-2 transition ${
+                          draggedBlockInfo?.secId === sec.id && draggedBlockInfo?.blockIndex === bIdx
+                            ? 'opacity-50 ring-2 ring-blue-400'
+                            : ''
+                        }`}
                       >
                         <div className="flex items-center justify-between text-[11px] font-medium text-slate-500">
-                          <span className="uppercase tracking-wider font-semibold text-slate-600 flex items-center gap-1">
-                            {block.type === 'bullets' && <List className="w-3.5 h-3.5 text-blue-500" />}
-                            {block.type === 'text' && <AlignLeft className="w-3.5 h-3.5 text-emerald-500" />}
-                            {block.type === 'image' && <ImageIcon className="w-3.5 h-3.5 text-purple-500" />}
-                            {block.type} Block
-                          </span>
+                          <div className="flex items-center gap-1.5">
+                            {/* Block Drag Handle (ONLY this handle is draggable) */}
+                            <div
+                              draggable
+                              onDragStart={(e) => {
+                                e.stopPropagation();
+                                handleBlockDragStart(sec.id, bIdx);
+                              }}
+                              className="cursor-grab active:cursor-grabbing p-1 text-slate-400 hover:text-slate-700 bg-white hover:bg-slate-100 rounded border border-slate-200 shadow-2xs"
+                              title="Drag from this icon to reorder block"
+                            >
+                              <GripVertical className="w-3.5 h-3.5" />
+                            </div>
+
+                            {/* Block Move Up / Down Buttons */}
+                            <button
+                              type="button"
+                              disabled={bIdx === 0}
+                              onClick={() => moveBlock(sec.id, bIdx, 'up')}
+                              className="text-slate-400 hover:text-gold-600 disabled:opacity-20"
+                            >
+                              <ChevronUp className="w-3 h-3" />
+                            </button>
+                            <button
+                              type="button"
+                              disabled={bIdx === sec.blocks.length - 1}
+                              onClick={() => moveBlock(sec.id, bIdx, 'down')}
+                              className="text-slate-400 hover:text-gold-600 disabled:opacity-20"
+                            >
+                              <ChevronDown className="w-3 h-3" />
+                            </button>
+
+                            <span className="uppercase tracking-wider font-semibold text-slate-600 flex items-center gap-1 ml-1">
+                              {block.type === 'bullets' && <List className="w-3.5 h-3.5 text-blue-500" />}
+                              {block.type === 'text' && <AlignLeft className="w-3.5 h-3.5 text-emerald-500" />}
+                              {block.type === 'image' && <ImageIcon className="w-3.5 h-3.5 text-purple-500" />}
+                              {block.type} Block
+                            </span>
+                          </div>
+
                           <button
                             onClick={() => removeBlock(sec.id, block.id)}
-                            className="text-slate-400 hover:text-red-500"
+                            className="text-slate-400 hover:text-red-500 p-1"
+                            title="Remove block"
                           >
                             <Trash2 className="w-3 h-3" />
                           </button>
                         </div>
 
-                        {/* Bullets Block Editor */}
+                        {/* Bullets Block with WYSIWYG Color & Bold Toolbar */}
                         {block.type === 'bullets' && (
-                          <div className="space-y-1.5">
+                          <div className="space-y-2">
                             {block.bulletPoints?.map((pt, ptIdx) => (
-                              <div key={ptIdx} className="flex items-start gap-1.5">
-                                <span className="text-slate-400 text-xs mt-1.5">•</span>
-                                <textarea
-                                  rows={2}
-                                  value={pt}
-                                  onChange={e => {
-                                    const nextPts = [...(block.bulletPoints || [])];
-                                    nextPts[ptIdx] = e.target.value;
-                                    updateBlock(sec.id, block.id, { bulletPoints: nextPts });
-                                  }}
-                                  className="w-full text-xs border border-slate-200 rounded p-1.5 bg-white focus:outline-navy-700"
-                                />
-                                <button
-                                  onClick={() => {
-                                    const nextPts = block.bulletPoints?.filter((_, i) => i !== ptIdx);
-                                    updateBlock(sec.id, block.id, { bulletPoints: nextPts });
-                                  }}
-                                  className="text-slate-300 hover:text-red-500 p-1 mt-1"
-                                >
-                                  &times;
-                                </button>
-                              </div>
+                              <RichBulletItem
+                                key={ptIdx}
+                                initialHtml={pt}
+                                onChange={(newHtml) => {
+                                  const nextPts = [...(block.bulletPoints || [])];
+                                  nextPts[ptIdx] = newHtml;
+                                  updateBlock(sec.id, block.id, { bulletPoints: nextPts });
+                                }}
+                                onRemove={() => {
+                                  const nextPts = block.bulletPoints?.filter((_, i) => i !== ptIdx);
+                                  updateBlock(sec.id, block.id, { bulletPoints: nextPts });
+                                }}
+                              />
                             ))}
+
                             <button
                               onClick={() => {
-                                const nextPts = [...(block.bulletPoints || []), 'New bullet point...'];
+                                const nextPts = [...(block.bulletPoints || []), ''];
                                 updateBlock(sec.id, block.id, { bulletPoints: nextPts });
                               }}
-                              className="text-xs text-gold-600 hover:underline font-medium inline-flex items-center gap-1"
+                              className="text-xs text-gold-600 hover:underline font-medium inline-flex items-center gap-1 mt-1"
                             >
                               <Plus className="w-3 h-3" /> Add Bullet Item
                             </button>
@@ -524,39 +782,29 @@ export const TechBriefBuilder: React.FC = () => {
                               updateBlock(sec.id, block.id, { content: e.target.value })
                             }
                             className="w-full text-xs border border-slate-200 rounded p-2 bg-white focus:outline-navy-700"
-                            placeholder="Enter paragraph text..."
+                            placeholder="Enter paragraph text (newspaper justified alignment will be applied)..."
                           />
                         )}
 
-                        {/* Image Block Editor */}
+                        {/* Image Block Editor with Fit & Zoom Controls */}
                         {block.type === 'image' && (
-                          <div className="space-y-2">
-                            <input
-                              type="text"
-                              value={block.title || ''}
-                              onChange={e =>
-                                updateBlock(sec.id, block.id, { title: e.target.value })
-                              }
-                              className="w-full text-xs font-medium border border-slate-200 rounded p-1.5 bg-white"
-                              placeholder="Subtitle (e.g. Synergistic Enhancement of Vitamin B12...)"
-                            />
-
+                          <div className="space-y-2.5">
                             <div className="flex items-center gap-3">
                               {block.imageUrl ? (
                                 <img
                                   src={block.imageUrl}
                                   alt="Preview"
-                                  className="h-14 w-20 object-contain rounded border bg-white"
+                                  className="h-16 w-24 object-contain rounded border bg-white"
                                 />
                               ) : (
-                                <div className="h-14 w-20 bg-slate-100 rounded border border-dashed flex items-center justify-center text-[10px] text-slate-400">
+                                <div className="h-16 w-24 bg-slate-100 rounded border border-dashed flex items-center justify-center text-[10px] text-slate-400">
                                   No Image
                                 </div>
                               )}
 
                               <div className="flex-1 space-y-1">
                                 <label className="block text-[11px] font-semibold text-slate-600">
-                                  Upload Image
+                                  Upload Figure/Chart
                                 </label>
                                 <input
                                   type="file"
@@ -570,6 +818,62 @@ export const TechBriefBuilder: React.FC = () => {
                                 />
                               </div>
                             </div>
+
+                            {/* Image Size & Fit Controls */}
+                            <div className="flex flex-wrap items-center gap-3 p-2 bg-slate-100/70 rounded-md text-xs">
+                              <span className="font-semibold text-slate-600 text-[11px]">Fit Mode:</span>
+                              <div className="inline-flex rounded-md shadow-2xs">
+                                <button
+                                  type="button"
+                                  onClick={() => updateBlock(sec.id, block.id, { imageFit: 'width' })}
+                                  className={`px-2.5 py-1 text-[11px] font-semibold rounded-l-md border ${
+                                    (block.imageFit || 'width') === 'width'
+                                      ? 'bg-navy-900 text-white border-blue-600'
+                                      : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                                  }`}
+                                >
+                                  Fit to Width (Default)
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => updateBlock(sec.id, block.id, { imageFit: 'height' })}
+                                  className={`px-2.5 py-1 text-[11px] font-semibold rounded-r-md border-t border-b border-r ${
+                                    block.imageFit === 'height'
+                                      ? 'bg-navy-900 text-white border-blue-600'
+                                      : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                                  }`}
+                                >
+                                  Fit to Height
+                                </button>
+                              </div>
+
+                              {/* Zoom Slider */}
+                              <div className="flex items-center gap-1.5 ml-auto">
+                                <span className="text-[11px] text-slate-500 font-medium">Zoom:</span>
+                                <input
+                                  type="range"
+                                  min={50}
+                                  max={150}
+                                  step={5}
+                                  value={block.imageZoom || 100}
+                                  onChange={e => updateBlock(sec.id, block.id, { imageZoom: parseInt(e.target.value) || 100 })}
+                                  className="w-20 accent-blue-600 h-1.5"
+                                />
+                                <span className="text-[11px] font-mono text-slate-600 w-8 text-right">
+                                  {block.imageZoom || 100}%
+                                </span>
+                              </div>
+                            </div>
+
+                            <input
+                              type="text"
+                              value={block.title || ''}
+                              onChange={e =>
+                                updateBlock(sec.id, block.id, { title: e.target.value })
+                              }
+                              className="w-full text-xs font-medium border border-slate-200 rounded p-1.5 bg-white"
+                              placeholder="Optional Figure Subtitle (leave blank if heading is already in image)..."
+                            />
                           </div>
                         )}
                       </div>
@@ -605,7 +909,7 @@ export const TechBriefBuilder: React.FC = () => {
             {/* 3. Contact Footer Editor */}
             <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-3">
               <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500">
-                3. Contact Information Footer (Last Page)
+                3. Contact Information Footer (Rendered on Last Page)
               </h2>
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div>
@@ -654,7 +958,7 @@ export const TechBriefBuilder: React.FC = () => {
               <div className="flex items-center justify-between pb-3 border-b border-slate-100">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
                   <Eye className="w-4 h-4 text-gold-600" />
-                  Live A4 Document Preview
+                  Live A4 Document Preview ({maxPage} {maxPage === 1 ? 'Page' : 'Pages'})
                 </span>
 
                 <div className="flex items-center gap-2">
