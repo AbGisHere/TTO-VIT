@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "innovation-vit"
+  },
+  "targets": {
+    "innovation-vit": {
+      "hosting": {
+        "tto": [
+          "innovation-vit-tto"
+        ]
+      }
+    }
+  }
+}
