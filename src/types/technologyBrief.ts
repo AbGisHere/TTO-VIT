@@ -9,8 +9,9 @@ export interface ContentBlock {
   imageUrl?: string; // Main image
   secondaryImageUrl?: string; // For two-images layout
   imageCaption?: string; // Optional caption (blank by default)
-  imageFit?: 'width' | 'height' | 'contain'; // default 'width' (fit to width)
+  imageFit?: 'width' | 'height' | 'contain' | 'cover'; // default 'width' (fit to width)
   imageZoom?: number; // default 100 (percentage zoom)
+  placeholderHeight?: number; // Optional placeholder container height in px (0 or undefined = auto)
 }
 
 export interface BriefSection {

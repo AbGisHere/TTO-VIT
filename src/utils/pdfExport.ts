@@ -1,8 +1,12 @@
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-export const exportBriefToPdf = async (techId: string, title: string): Promise<Blob> => {
-  // 1. Ensure all custom web fonts are fully ready
+export const exportBriefToPdf = async (
+  techId: string,
+  title: string,
+  downloadDirectly: boolean = true
+): Promise<Blob> => {
+  // 1. Ensure all custom web fonts (Montserrat, Plus Jakarta Sans, Arial) are fully loaded
   await document.fonts.ready;
 
   const container = document.querySelector<HTMLElement>('.tech-brief-print-container');
@@ -10,12 +14,12 @@ export const exportBriefToPdf = async (techId: string, title: string): Promise<B
     throw new Error('No printable container found in document');
   }
 
-  // 2. Crucial fix: Remove CSS scale transform during canvas capture so text kerning does not overlap!
+  // 2. Remove CSS scale transform during canvas capture so text kerning and geometry are 100% natural
   const prevTransform = container.style.transform;
   container.style.transform = 'none';
 
   // Allow DOM to reflow at natural 100% scale
-  await new Promise(resolve => setTimeout(resolve, 120));
+  await new Promise(resolve => setTimeout(resolve, 150));
 
   try {
     const pageElements = document.querySelectorAll<HTMLElement>('.sheet-page');
@@ -37,7 +41,7 @@ export const exportBriefToPdf = async (techId: string, title: string): Promise<B
         pdf.addPage('a4', 'portrait');
       }
 
-      // Capture at crisp 2x resolution with clean font metrics
+      // Capture at crisp 2x resolution
       const canvas = await html2canvas(pageEl, {
         scale: 2,
         useCORS: true,
@@ -48,12 +52,14 @@ export const exportBriefToPdf = async (techId: string, title: string): Promise<B
         height: 1263
       });
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      const imgData = canvas.toDataURL('image/jpeg', 0.96);
       pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
     }
 
-    const safeFilename = `${techId || 'Technology_Brief'}_${title.substring(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
-    pdf.save(safeFilename);
+    if (downloadDirectly) {
+      const safeFilename = `${techId || 'Technology_Brief'}_${title.substring(0, 30).replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+      pdf.save(safeFilename);
+    }
 
     return pdf.output('blob');
   } finally {

@@ -3,7 +3,7 @@ import { TechnologyBriefData } from '../types/technologyBrief';
 export const defaultEmptyBriefData: TechnologyBriefData = {
   techId: '',
   title: '',
-  titleBannerBgColor: '#76cb3c',
+  titleBannerBgColor: '#7ed957',
   domains: [],
   applications: [],
   trlLevel: 1,
@@ -29,7 +29,7 @@ export const defaultEmptyBriefData: TechnologyBriefData = {
     {
       id: 'sec-domain',
       title: 'Technology Domain',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 1,
       columnPosition: 'left',
@@ -45,7 +45,7 @@ export const defaultEmptyBriefData: TechnologyBriefData = {
     {
       id: 'sec-applications',
       title: 'Applications',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 1,
       columnPosition: 'right',
@@ -61,7 +61,7 @@ export const defaultEmptyBriefData: TechnologyBriefData = {
     {
       id: 'sec-problem',
       title: 'Problem Statement',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 1,
       columnPosition: 'left',
@@ -77,7 +77,7 @@ export const defaultEmptyBriefData: TechnologyBriefData = {
     {
       id: 'sec-results',
       title: 'Results',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 1,
       columnPosition: 'right',
@@ -93,7 +93,7 @@ export const defaultEmptyBriefData: TechnologyBriefData = {
     {
       id: 'sec-solution',
       title: 'Technological Solution',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 1,
       columnPosition: 'left',
@@ -109,7 +109,7 @@ export const defaultEmptyBriefData: TechnologyBriefData = {
     {
       id: 'sec-summary',
       title: 'Technology Summary',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 2,
       page: 1,
@@ -126,7 +126,7 @@ export const defaultEmptyBriefData: TechnologyBriefData = {
     {
       id: 'sec-usp',
       title: 'Technical USP',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 2,
       page: 2,
@@ -141,7 +141,7 @@ export const defaultEmptyBriefData: TechnologyBriefData = {
     {
       id: 'sec-results-page2',
       title: 'Results',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 1,
       columnPosition: 'left',
@@ -157,7 +157,7 @@ export const defaultEmptyBriefData: TechnologyBriefData = {
     {
       id: 'sec-comp-adv',
       title: 'Competitive Advantage',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 1,
       columnPosition: 'left',
@@ -173,7 +173,7 @@ export const defaultEmptyBriefData: TechnologyBriefData = {
     {
       id: 'sec-ip-stage',
       title: 'IP & Development Stage',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 1,
       columnPosition: 'right',
@@ -189,7 +189,7 @@ export const defaultEmptyBriefData: TechnologyBriefData = {
     {
       id: 'sec-value-prop',
       title: 'Value Proposition',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 1,
       columnPosition: 'right',
@@ -205,7 +205,7 @@ export const defaultEmptyBriefData: TechnologyBriefData = {
     {
       id: 'sec-market',
       title: 'Market Potential',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 1,
       columnPosition: 'right',
@@ -221,7 +221,7 @@ export const defaultEmptyBriefData: TechnologyBriefData = {
     {
       id: 'sec-research-lab',
       title: 'Research Lab',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 2,
       page: 2,

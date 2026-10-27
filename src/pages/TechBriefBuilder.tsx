@@ -46,8 +46,31 @@ const RichBulletItem: React.FC<{
     }
   }, [initialHtml]);
 
-  const applyCommand = (command: string, value: string | undefined = undefined) => {
-    document.execCommand(command, false, value);
+  const applyRedHighlight = () => {
+    document.execCommand('bold', false);
+    document.execCommand('foreColor', false, '#ff3131');
+    if (editorRef.current) {
+      onChange(editorRef.current.innerHTML);
+    }
+  };
+
+  const applyBold = () => {
+    document.execCommand('bold', false);
+    if (editorRef.current) {
+      onChange(editorRef.current.innerHTML);
+    }
+  };
+
+  const applyUnderline = () => {
+    document.execCommand('underline', false);
+    if (editorRef.current) {
+      onChange(editorRef.current.innerHTML);
+    }
+  };
+
+  const clearFormatting = () => {
+    document.execCommand('removeFormat', false);
+    document.execCommand('foreColor', false, '#000000');
     if (editorRef.current) {
       onChange(editorRef.current.innerHTML);
     }
@@ -59,45 +82,37 @@ const RichBulletItem: React.FC<{
       <div className="flex items-center gap-1.5 pb-1 border-b border-slate-100 text-xs">
         <button
           type="button"
-          onMouseDown={(e) => { e.preventDefault(); applyCommand('bold'); }}
-          className="px-2 py-0.5 rounded font-bold hover:bg-slate-100 border text-slate-800"
+          onMouseDown={(e) => { e.preventDefault(); applyRedHighlight(); }}
+          className="px-2.5 py-0.5 rounded font-extrabold bg-red-50 hover:bg-red-100 border border-red-300 text-[#ff3131] flex items-center gap-1 shadow-2xs transition"
+          title="Turn selected word(s) into Canva Bold Red Highlight"
+        >
+          <span className="w-2.5 h-2.5 rounded-full bg-[#ff3131]" /> 🔴 Bold Red Highlight
+        </button>
+        <button
+          type="button"
+          onMouseDown={(e) => { e.preventDefault(); applyBold(); }}
+          className="px-2 py-0.5 rounded font-bold hover:bg-slate-100 border border-slate-300 text-slate-800"
           title="Bold selected text"
         >
           B
         </button>
         <button
           type="button"
-          onMouseDown={(e) => { e.preventDefault(); applyCommand('underline'); }}
-          className="px-2 py-0.5 rounded underline hover:bg-slate-100 border text-slate-800"
+          onMouseDown={(e) => { e.preventDefault(); applyUnderline(); }}
+          className="px-2 py-0.5 rounded underline hover:bg-slate-100 border border-slate-300 text-slate-800"
           title="Underline selected text"
         >
           <u>U</u>
         </button>
         <button
           type="button"
-          onMouseDown={(e) => { e.preventDefault(); applyCommand('foreColor', '#ff3131'); }}
-          className="px-2 py-0.5 rounded font-bold hover:bg-red-50 border border-red-200 text-[#ff3131] flex items-center gap-1"
-          title="Turn selected text RED (#ff3131)"
+          onMouseDown={(e) => { e.preventDefault(); clearFormatting(); }}
+          className="px-2 py-0.5 rounded text-[11px] hover:bg-slate-100 border border-slate-200 text-slate-500"
+          title="Reset to regular black text"
         >
-          <span className="w-2.5 h-2.5 rounded-full bg-[#ff3131]" /> Red
+          Reset
         </button>
-        <button
-          type="button"
-          onMouseDown={(e) => { e.preventDefault(); applyCommand('foreColor', '#0284c7'); }}
-          className="px-2 py-0.5 rounded font-bold hover:bg-sky-50 border border-sky-200 text-[#0284c7] flex items-center gap-1"
-          title="Turn selected text Blue"
-        >
-          <span className="w-2.5 h-2.5 rounded-full bg-[#0284c7]" /> Blue
-        </button>
-        <button
-          type="button"
-          onMouseDown={(e) => { e.preventDefault(); applyCommand('foreColor', '#000000'); }}
-          className="px-2 py-0.5 rounded font-bold hover:bg-slate-100 border text-black"
-          title="Reset to black text"
-        >
-          Black
-        </button>
-        <span className="text-[10px] text-slate-400 ml-auto italic">Select text & click color</span>
+        <span className="text-[10px] text-slate-400 ml-auto italic">Select text & click Bold Red</span>
       </div>
 
       <div className="flex items-start gap-2">
@@ -337,19 +352,35 @@ export const TechBriefBuilder: React.FC = () => {
     }
   };
 
-  // Save to Firestore
+  // Save to Firestore & Store Official PDF to Firebase Storage
   const handleSaveToFirestore = async () => {
     try {
       setIsSaving(true);
       setErrorMessage(null);
+
+      let storedPdfUrl = briefData.pdfUrl || '';
+
+      // Auto-generate crisp PDF and store in Firebase Storage
+      try {
+        const pdfBlob = await exportBriefToPdf(briefData.techId, briefData.title, false);
+        const fileName = `${briefData.techId || 'brief'}_${Date.now()}.pdf`;
+        const storageRef = ref(storage, `tech-briefs-pdf/${fileName}`);
+        await uploadBytes(storageRef, pdfBlob, { contentType: 'application/pdf' });
+        storedPdfUrl = await getDownloadURL(storageRef);
+        setBriefData(prev => ({ ...prev, pdfUrl: storedPdfUrl }));
+      } catch (pdfErr) {
+        console.warn("Storage PDF auto-upload skipped or failed:", pdfErr);
+      }
+
       await addDoc(collection(db, 'technology_briefs'), {
         ...briefData,
+        pdfUrl: storedPdfUrl,
         createdByEmail: user?.email || 'abg.592006@gmail.com',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
       setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 4000);
+      setTimeout(() => setSaveSuccess(false), 5000);
     } catch (err: any) {
       console.error("Error saving brief:", err);
       setErrorMessage("Could not save to Firestore: " + err.message);
@@ -786,25 +817,25 @@ export const TechBriefBuilder: React.FC = () => {
                           />
                         )}
 
-                        {/* Image Block Editor with Fit & Zoom Controls */}
+                        {/* Image Block Editor with Adjustable Placeholder & Fit Controls */}
                         {block.type === 'image' && (
-                          <div className="space-y-2.5">
+                          <div className="space-y-3 p-3 bg-white rounded-lg border border-slate-200">
                             <div className="flex items-center gap-3">
                               {block.imageUrl ? (
                                 <img
                                   src={block.imageUrl}
                                   alt="Preview"
-                                  className="h-16 w-24 object-contain rounded border bg-white"
+                                  className="h-20 w-28 object-contain rounded border bg-slate-50"
                                 />
                               ) : (
-                                <div className="h-16 w-24 bg-slate-100 rounded border border-dashed flex items-center justify-center text-[10px] text-slate-400">
+                                <div className="h-20 w-28 bg-slate-100 rounded border border-dashed flex items-center justify-center text-[10px] text-slate-400">
                                   No Image
                                 </div>
                               )}
 
                               <div className="flex-1 space-y-1">
-                                <label className="block text-[11px] font-semibold text-slate-600">
-                                  Upload Figure/Chart
+                                <label className="block text-[11px] font-semibold text-slate-700">
+                                  Upload Figure / Chart / Photo
                                 </label>
                                 <input
                                   type="file"
@@ -816,12 +847,76 @@ export const TechBriefBuilder: React.FC = () => {
                                   }}
                                   className="text-[11px] text-slate-500 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[11px] file:bg-navy-50 file:text-navy-800 hover:file:bg-blue-100"
                                 />
+                                <span className="text-[10px] text-slate-400 block">
+                                  Note: Images with built-in titles/captions will render directly without duplicate text.
+                                </span>
                               </div>
                             </div>
 
-                            {/* Image Size & Fit Controls */}
-                            <div className="flex flex-wrap items-center gap-3 p-2 bg-slate-100/70 rounded-md text-xs">
-                              <span className="font-semibold text-slate-600 text-[11px]">Fit Mode:</span>
+                            {/* Placeholder Height Control */}
+                            <div className="p-2.5 bg-slate-50 rounded border border-slate-200/80 space-y-2">
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="font-bold text-slate-700 text-[11px]">Placeholder Height:</span>
+                                <div className="flex items-center gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => updateBlock(sec.id, block.id, { placeholderHeight: undefined })}
+                                    className={`px-2 py-0.5 text-[11px] rounded font-semibold border ${
+                                      !block.placeholderHeight || block.placeholderHeight === 0
+                                        ? 'bg-navy-900 text-white border-blue-600'
+                                        : 'bg-white text-slate-700 border-slate-300'
+                                    }`}
+                                  >
+                                    Auto (Natural)
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => updateBlock(sec.id, block.id, { placeholderHeight: 180 })}
+                                    className={`px-2 py-0.5 text-[11px] rounded font-semibold border ${
+                                      block.placeholderHeight === 180
+                                        ? 'bg-navy-900 text-white border-blue-600'
+                                        : 'bg-white text-slate-700 border-slate-300'
+                                    }`}
+                                  >
+                                    180px
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => updateBlock(sec.id, block.id, { placeholderHeight: 220 })}
+                                    className={`px-2 py-0.5 text-[11px] rounded font-semibold border ${
+                                      block.placeholderHeight === 220
+                                        ? 'bg-navy-900 text-white border-blue-600'
+                                        : 'bg-white text-slate-700 border-slate-300'
+                                    }`}
+                                  >
+                                    220px
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Manual Height Slider */}
+                              {block.placeholderHeight && block.placeholderHeight > 0 && (
+                                <div className="flex items-center gap-2 pt-1 border-t border-slate-200">
+                                  <span className="text-[10px] text-slate-500 font-medium">Custom Height:</span>
+                                  <input
+                                    type="range"
+                                    min={80}
+                                    max={400}
+                                    step={10}
+                                    value={block.placeholderHeight || 200}
+                                    onChange={e => updateBlock(sec.id, block.id, { placeholderHeight: parseInt(e.target.value) || 200 })}
+                                    className="flex-1 accent-navy-900 h-1.5"
+                                  />
+                                  <span className="text-[11px] font-mono text-slate-700 w-12 text-right">
+                                    {block.placeholderHeight}px
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Fit & Zoom Controls */}
+                            <div className="flex flex-wrap items-center gap-3 p-2 bg-slate-50 rounded border border-slate-200/80 text-xs">
+                              <span className="font-bold text-slate-700 text-[11px]">Fit Mode:</span>
                               <div className="inline-flex rounded-md shadow-2xs">
                                 <button
                                   type="button"
@@ -837,13 +932,24 @@ export const TechBriefBuilder: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => updateBlock(sec.id, block.id, { imageFit: 'height' })}
-                                  className={`px-2.5 py-1 text-[11px] font-semibold rounded-r-md border-t border-b border-r ${
+                                  className={`px-2.5 py-1 text-[11px] font-semibold border-t border-b border-r ${
                                     block.imageFit === 'height'
                                       ? 'bg-navy-900 text-white border-blue-600'
                                       : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
                                   }`}
                                 >
                                   Fit to Height
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => updateBlock(sec.id, block.id, { imageFit: 'cover' })}
+                                  className={`px-2.5 py-1 text-[11px] font-semibold rounded-r-md border-t border-b border-r ${
+                                    block.imageFit === 'cover'
+                                      ? 'bg-navy-900 text-white border-blue-600'
+                                      : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                                  }`}
+                                >
+                                  Cover
                                 </button>
                               </div>
 
@@ -857,7 +963,7 @@ export const TechBriefBuilder: React.FC = () => {
                                   step={5}
                                   value={block.imageZoom || 100}
                                   onChange={e => updateBlock(sec.id, block.id, { imageZoom: parseInt(e.target.value) || 100 })}
-                                  className="w-20 accent-blue-600 h-1.5"
+                                  className="w-20 accent-navy-900 h-1.5"
                                 />
                                 <span className="text-[11px] font-mono text-slate-600 w-8 text-right">
                                   {block.imageZoom || 100}%
@@ -865,15 +971,18 @@ export const TechBriefBuilder: React.FC = () => {
                               </div>
                             </div>
 
-                            <input
-                              type="text"
-                              value={block.title || ''}
-                              onChange={e =>
-                                updateBlock(sec.id, block.id, { title: e.target.value })
-                              }
-                              className="w-full text-xs font-medium border border-slate-200 rounded p-1.5 bg-white"
-                              placeholder="Optional Figure Subtitle (leave blank if heading is already in image)..."
-                            />
+                            {/* Optional Figure Title */}
+                            <div>
+                              <input
+                                type="text"
+                                value={block.title || ''}
+                                onChange={e =>
+                                  updateBlock(sec.id, block.id, { title: e.target.value })
+                                }
+                                className="w-full text-xs font-medium border border-slate-200 rounded p-1.5 bg-white"
+                                placeholder="Optional Figure Title (leave blank if heading is already in image)..."
+                              />
+                            </div>
                           </div>
                         )}
                       </div>

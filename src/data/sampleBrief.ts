@@ -3,7 +3,7 @@ import { TechnologyBriefData } from '../types/technologyBrief';
 export const sampleBriefData: TechnologyBriefData = {
   techId: '2024VITTTO73',
   title: 'Natural Vitamin B12 Fortification in Fermented Foods',
-  titleBannerBgColor: '#76cb3c',
+  titleBannerBgColor: '#7ed957',
   domains: ['Food Biotechnology', 'Fermentation Microbiology', 'Nutraceutical Engineering'],
   applications: ['Staple Batter Enrichment', 'Bakery Products', 'Dairy Fermentation'],
   trlLevel: 5,
@@ -29,7 +29,7 @@ export const sampleBriefData: TechnologyBriefData = {
     {
       id: 'sec-domain',
       title: 'Technology Domain',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 1,
       columnPosition: 'left',
@@ -49,7 +49,7 @@ export const sampleBriefData: TechnologyBriefData = {
     {
       id: 'sec-applications',
       title: 'Applications',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 1,
       columnPosition: 'right',
@@ -69,7 +69,7 @@ export const sampleBriefData: TechnologyBriefData = {
     {
       id: 'sec-problem',
       title: 'Problem Statement',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 1,
       columnPosition: 'left',
@@ -90,7 +90,7 @@ export const sampleBriefData: TechnologyBriefData = {
     {
       id: 'sec-results',
       title: 'Results',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 1,
       columnPosition: 'right',
@@ -99,19 +99,21 @@ export const sampleBriefData: TechnologyBriefData = {
         {
           id: 'blk-res-1',
           type: 'image',
-          imageUrl: '/assets/sample/img-009.png'
+          imageUrl: '/assets/sample/curdled_milk_composite.png',
+          imageFit: 'width'
         },
         {
           id: 'blk-res-2',
           type: 'image',
-          imageUrl: '/assets/sample/img-010.png'
+          imageUrl: '/assets/sample/idly_dosa_composite.png',
+          imageFit: 'width'
         }
       ]
     },
     {
       id: 'sec-solution',
       title: 'Technological Solution',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 1,
       columnPosition: 'left',
@@ -131,7 +133,7 @@ export const sampleBriefData: TechnologyBriefData = {
     {
       id: 'sec-summary',
       title: 'Technology Summary',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 2,
       page: 1,
@@ -148,7 +150,7 @@ export const sampleBriefData: TechnologyBriefData = {
     {
       id: 'sec-usp',
       title: 'Technical USP',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 2,
       page: 2,
@@ -166,7 +168,7 @@ export const sampleBriefData: TechnologyBriefData = {
     {
       id: 'sec-results-page2',
       title: 'Results',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 1,
       columnPosition: 'left',
@@ -175,19 +177,21 @@ export const sampleBriefData: TechnologyBriefData = {
         {
           id: 'blk-res-p2-1',
           type: 'image',
-          imageUrl: '/assets/sample/img-020.png'
+          imageUrl: '/assets/sample/appam_composite.png',
+          imageFit: 'width'
         },
         {
           id: 'blk-res-p2-2',
           type: 'image',
-          imageUrl: '/assets/sample/img-021.png'
+          imageUrl: '/assets/sample/bread_composite.png',
+          imageFit: 'width'
         }
       ]
     },
     {
       id: 'sec-comp-adv',
       title: 'Competitive Advantage',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 1,
       columnPosition: 'left',
@@ -207,7 +211,7 @@ export const sampleBriefData: TechnologyBriefData = {
     {
       id: 'sec-ip-stage',
       title: 'IP & Development Stage',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 1,
       columnPosition: 'right',
@@ -227,7 +231,7 @@ export const sampleBriefData: TechnologyBriefData = {
     {
       id: 'sec-value-prop',
       title: 'Value Proposition',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 1,
       columnPosition: 'right',
@@ -248,7 +252,7 @@ export const sampleBriefData: TechnologyBriefData = {
     {
       id: 'sec-market',
       title: 'Market Potential',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 1,
       columnPosition: 'right',
@@ -268,7 +272,7 @@ export const sampleBriefData: TechnologyBriefData = {
     {
       id: 'sec-research-lab',
       title: 'Research Lab',
-      headerBgColor: '#52d1dc',
+      headerBgColor: '#5ce1e6',
       headerTextColor: '#000000',
       columnSpan: 2,
       page: 2,
