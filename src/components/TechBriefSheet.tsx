@@ -1,6 +1,5 @@
 import React from 'react';
 import { TechnologyBriefData, BriefSection, ContentBlock } from '../types/technologyBrief';
-import { TTO_HEADER_PNG, HEXAGON_TEAL_PNG, IPR_CELL_LOGO_PNG } from '../assets/brandingBase64';
 
 interface TechBriefSheetProps {
   data: TechnologyBriefData;
@@ -188,7 +187,7 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
             <div className="w-full">
               <div className="w-full relative">
                 <img
-                  src={TTO_HEADER_PNG}
+                  src="/assets/branding/tto_header.png"
                   alt="VIT TTO Header"
                   className="w-full h-auto block object-contain"
                 />
@@ -210,7 +209,7 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
                   <div className="w-full relative my-2 overflow-visible">
                     {/* Canva Teal Hexagon peeking symmetrically above and below the green bar on the left */}
                     <img
-                      src={HEXAGON_TEAL_PNG}
+                      src="/assets/branding/hexagon_teal.png"
                       alt=""
                       className="absolute left-[36px] -top-[18px] w-[75px] h-[86px] pointer-events-none z-0 object-contain"
                     />
@@ -282,7 +281,7 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
 
                     <div className="col-span-2 flex justify-center items-center">
                       <img
-                        src={IPR_CELL_LOGO_PNG}
+                        src="/assets/branding/ipr_cell_logo.png"
                         alt="IPR & TT Cell Logo"
                         className="max-h-20 w-auto object-contain"
                       />
