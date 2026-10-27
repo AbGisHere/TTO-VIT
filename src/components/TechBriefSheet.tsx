@@ -210,7 +210,7 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
                   </div>
 
                   {/* Green Title Banner: Spans 100% full-width with peeking hexagon */}
-                  <div className="w-full relative my-2 overflow-visible">
+                  <div className="w-full relative mt-2 mb-6 overflow-visible">
                     {/* Canva Teal Hexagon peeking symmetrically above and below the green bar on the left */}
                     <img
                       src="/assets/branding/hexagon_teal.png"
