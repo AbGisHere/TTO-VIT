@@ -3,12 +3,14 @@ export type SectionBlockType = 'text' | 'bullets' | 'image' | 'two-images' | 'te
 export interface ContentBlock {
   id: string;
   type: SectionBlockType;
-  title?: string; // Optional sub-heading (e.g. "Synergistic Enhancement of Vitamin B12...")
-  content?: string; // Text or markdown/html with bold tags
+  title?: string; // Optional figure subtitle (blank by default)
+  content?: string; // Text or html
   bulletPoints?: string[]; // Array of bullet items
   imageUrl?: string; // Main image
-  secondaryImageUrl?: string; // For two-images layout (e.g. chart + product photo)
-  imageCaption?: string;
+  secondaryImageUrl?: string; // For two-images layout
+  imageCaption?: string; // Optional caption (blank by default)
+  imageFit?: 'width' | 'height' | 'contain'; // default 'width' (fit to width)
+  imageZoom?: number; // default 100 (percentage zoom)
 }
 
 export interface BriefSection {
@@ -16,8 +18,9 @@ export interface BriefSection {
   title: string;
   headerBgColor?: string; // default "#52d1dc"
   headerTextColor?: string; // default "#000000"
-  columnSpan: 1 | 2; // 1 = half width (left or right column), 2 = full width
-  page?: 1 | 2 | 3;
+  columnSpan: 1 | 2; // 1 = half column, 2 = full width
+  columnPosition?: 'left' | 'right'; // Which column for half-width sections
+  page?: number;
   blocks: ContentBlock[];
 }
 
@@ -34,17 +37,17 @@ export interface ContactInfo {
 
 export interface TechnologyBriefData {
   id?: string;
-  techId: string; // e.g. "2024VITTTO73"
-  title: string; // e.g. "Natural Vitamin B12 Fortification in Fermented Foods"
-  titleBannerBgColor?: string; // default "#76cb3c" (institutional green)
-  domains: string[]; // e.g. ["Food Biotechnology", "Fermentation Microbiology"]
-  applications: string[]; // e.g. ["Staple Batter Enrichment", "Bakery Products"]
-  trlLevel: number; // 1 - 9
-  patentStatus: string; // e.g. "Patent Pending", "Granted", "Published"
+  techId: string;
+  title: string;
+  titleBannerBgColor?: string;
+  domains: string[];
+  applications: string[];
+  trlLevel: number;
+  patentStatus: string;
   patentApplicationNo?: string;
   priorityDate?: string;
-  leadInventor: string; // e.g. "Dr. Krishnan Venkataraman"
-  inventorDesignation: string; // e.g. "Professor, Centre for Bio Separation Technology (CBST), VIT Vellore"
+  leadInventor: string;
+  inventorDesignation: string;
   coInventors?: string[];
   sections: BriefSection[];
   contactInfo: ContactInfo;

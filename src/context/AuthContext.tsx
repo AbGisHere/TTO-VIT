@@ -62,7 +62,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const userDocRef = doc(db, 'users', fbUser.uid);
             const userSnap = await getDoc(userDocRef);
 
-            if (userSnap.exists()) {
+            if (INITIAL_SUPER_ADMINS.includes(fbUser.email.toLowerCase())) {
+              assignedRole = 'master_admin';
+              await setDoc(userDocRef, {
+                uid: fbUser.uid,
+                email: fbUser.email,
+                displayName: fbUser.displayName || '',
+                photoURL: fbUser.photoURL || '',
+                role: 'master_admin',
+                domain,
+                updatedAt: new Date().toISOString()
+              }, { merge: true });
+            } else if (userSnap.exists()) {
               const data = userSnap.data();
               if (data.role) {
                 assignedRole = data.role as UserRole;
