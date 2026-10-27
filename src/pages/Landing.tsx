@@ -259,7 +259,7 @@ export const Landing: React.FC = () => {
             <p>Sr. Technology Transfer Officer</p>
           </div>
           <div className="mx-auto bg-white rounded-xl p-3">
-            <img src="/assets/branding/ipr_cell_logo.png" alt="IPR & TT Cell, VIT Vellore" className="h-24 w-auto" />
+            <img src="/assets/branding/ipr_cell_logo_full.png" alt="IPR & TT Cell, VIT Vellore" className="h-24 w-auto" />
           </div>
           <div className="space-y-2 md:justify-self-end">
             <a href="mailto:manish.k@vit.ac.in" className="flex items-center gap-2 hover:text-white"><Mail className="w-4 h-4 text-gold-400" /> manish.k@vit.ac.in</a>

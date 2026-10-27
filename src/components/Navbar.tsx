@@ -54,7 +54,7 @@ export const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[72px] flex items-center gap-6">
         {/* Brand */}
         <Link to="/" className="flex items-center gap-3 shrink-0">
-          <img src="/assets/branding/ipr_cell_logo.png" alt="IPR & TT Cell, VIT Vellore" className="h-11 w-auto" />
+          <img src="/assets/branding/ipr_cell_logo_full.png" alt="IPR & TT Cell, VIT Vellore" className="h-11 w-auto" />
           <span className="hidden sm:block leading-tight border-l border-navy-100 pl-3">
             <span className="block font-display text-[17px] font-extrabold text-navy-700">Technology Transfer Office</span>
             <span className="block text-[11px] tracking-wide text-slate-500">VIT Vellore · IP &amp; Commercialization</span>
