@@ -54,3 +54,4 @@ Thumbs.db
 coverage/
 .nyc_output/
 *.tsbuildinfo
+sample_assets/
