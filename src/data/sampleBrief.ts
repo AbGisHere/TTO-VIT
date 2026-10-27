@@ -181,14 +181,14 @@ export const sampleBriefData: TechnologyBriefData = {
           type: 'image',
           imageUrl: '/assets/sample/appam_composite.png',
           imageFit: 'contain',
-          placeholderHeight: 215
+          placeholderHeight: 155
         },
         {
           id: 'blk-res-p2-2',
           type: 'image',
           imageUrl: '/assets/sample/bread_composite.png',
           imageFit: 'contain',
-          placeholderHeight: 215
+          placeholderHeight: 155
         }
       ]
     },

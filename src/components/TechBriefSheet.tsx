@@ -1,5 +1,6 @@
 import React from 'react';
 import { TechnologyBriefData, BriefSection, ContentBlock } from '../types/technologyBrief';
+import { TTO_HEADER_PNG, HEXAGON_TEAL_PNG, IPR_CELL_LOGO_PNG } from '../assets/brandingBase64';
 
 interface TechBriefSheetProps {
   data: TechnologyBriefData;
@@ -23,7 +24,7 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
         return (
           // Content in Arial MT Pro 12pt (16px, 24px line pitch, text-justify)
           // Uses explicit solid round bullet elements instead of CSS ::marker to ensure crisp circular bullets in all PDF engines
-          <ul className="space-y-1.5 text-[16px] leading-[24px] text-black font-['Arial',sans-serif] text-justify list-none p-0 m-0">
+          <ul className="space-y-1.5 text-[16px] leading-[23px] text-black font-['Arial',sans-serif] text-justify list-none p-0 m-0">
             {block.bulletPoints?.map((pt, i) => (
               <li key={i} className="flex items-start">
                 <span className="w-1.5 h-1.5 rounded-full bg-black mt-[9px] mr-2.5 shrink-0 inline-block" />
@@ -36,7 +37,7 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
       case 'text':
         return (
           <div
-            className="text-[16px] leading-[24px] text-black font-['Arial',sans-serif] text-justify space-y-2 whitespace-pre-line"
+            className="text-[16px] leading-[23px] text-black font-['Arial',sans-serif] text-justify space-y-2 whitespace-pre-line"
             dangerouslySetInnerHTML={{ __html: block.content || '' }}
           />
         );
@@ -87,7 +88,7 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
 
             {block.content && block.content.trim() !== '' && (
               <div
-                className="text-[16px] text-justify leading-[24px] text-black font-['Arial',sans-serif] mb-1.5"
+                className="text-[16px] text-justify leading-[23px] text-black font-['Arial',sans-serif] mb-1.5"
                 dangerouslySetInnerHTML={{ __html: block.content }}
               />
             )}
@@ -128,7 +129,7 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
       <div key={sec.id} className="flex flex-col w-full">
         {/* Section Heading in Canva Sans 14pt (Bold) ~ 18.6px Title Case */}
         <div
-          className="py-1 px-3 mb-2 text-center font-bold text-[18.6px] tracking-normal font-['Montserrat',sans-serif]"
+          className="py-1 px-3 mb-1.5 text-center font-bold text-[18.6px] tracking-normal font-['Montserrat',sans-serif]"
           style={{
             backgroundColor: sec.headerBgColor || '#5ce1e6',
             color: sec.headerTextColor || '#000000'
@@ -168,8 +169,8 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
         const rightSections = columnSections.filter(s => s.columnPosition === 'right' || (!s.columnPosition && columnSections.indexOf(s) % 2 !== 0));
 
         // Exact uniform vertical gap constants matching Canva
-        const sectionGapClass = p.pageNum === 1 ? 'space-y-[22px]' : 'space-y-[14px]';
-        const interBlockGap = p.pageNum === 1 ? 'mt-[22px]' : 'mt-[14px]';
+        const sectionGapClass = p.pageNum === 1 ? 'space-y-[22px]' : 'space-y-[10px]';
+        const interBlockGap = p.pageNum === 1 ? 'mt-[22px]' : 'mt-[10px]';
 
         return (
           <div
@@ -187,7 +188,7 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
             <div className="w-full">
               <div className="w-full relative">
                 <img
-                  src="/assets/branding/tto_header.png"
+                  src={TTO_HEADER_PNG}
                   alt="VIT TTO Header"
                   className="w-full h-auto block object-contain"
                 />
@@ -209,7 +210,7 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
                   <div className="w-full relative my-2 overflow-visible">
                     {/* Canva Teal Hexagon peeking symmetrically above and below the green bar on the left */}
                     <img
-                      src="/assets/branding/hexagon_teal.png"
+                      src={HEXAGON_TEAL_PNG}
                       alt=""
                       className="absolute left-[36px] -top-[18px] w-[75px] h-[86px] pointer-events-none z-0 object-contain"
                     />
@@ -231,10 +232,10 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
             </div>
 
             {/* MAIN CONTENT AREA: Clean, uniform gap spacing between all sections without stretching */}
-            <div className="flex-1 px-[36px] pt-2 pb-1 flex flex-col justify-start overflow-hidden">
+            <div className="flex-1 px-[36px] pt-1 pb-1 flex flex-col justify-start">
               {/* Top full width sections (e.g. Technical USP on Page 2) */}
               {topFullSections.map(s => (
-                <div key={s.id} className="w-full mb-[14px]">
+                <div key={s.id} className="w-full mb-[10px]">
                   {renderSection(s)}
                 </div>
               ))}
@@ -270,7 +271,7 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
 
               {/* LAST PAGE ONLY: 3-Column Contact Box */}
               {p.isLast && (
-                <div className="px-[36px] py-3 bg-white">
+                <div className="px-[36px] py-2 bg-white">
                   <div className="grid grid-cols-12 gap-3 items-center text-[15px] font-['Arial',sans-serif] leading-snug">
                     <div className="col-span-5 bg-[#e1edfe] p-3 rounded h-full flex flex-col justify-center">
                       <p className="font-bold text-black">Contact:</p>
@@ -281,7 +282,7 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
 
                     <div className="col-span-2 flex justify-center items-center">
                       <img
-                        src="/assets/branding/ipr_cell_logo.png"
+                        src={IPR_CELL_LOGO_PNG}
                         alt="IPR & TT Cell Logo"
                         className="max-h-20 w-auto object-contain"
                       />

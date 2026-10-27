@@ -14,12 +14,24 @@ export const exportBriefToPdf = async (
     throw new Error('No printable container found in document');
   }
 
-  // 2. Remove CSS scale transform during capture so metrics and typography are 100% natural
+  // 2. Ensure all images in the document are fully loaded and decoded in memory
+  const images = Array.from(container.querySelectorAll('img'));
+  await Promise.all(
+    images.map(img => {
+      if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+      return new Promise(resolve => {
+        img.onload = resolve;
+        img.onerror = resolve;
+      });
+    })
+  );
+
+  // 3. Remove CSS scale transform during capture so metrics and typography are 100% natural
   const prevTransform = container.style.transform;
   container.style.transform = 'none';
 
   // Allow DOM to reflow at natural 100% scale
-  await new Promise(resolve => setTimeout(resolve, 200));
+  await new Promise(resolve => setTimeout(resolve, 250));
 
   try {
     const pageElements = document.querySelectorAll<HTMLElement>('.sheet-page');
@@ -43,14 +55,14 @@ export const exportBriefToPdf = async (
 
       // html-to-image uses native browser SVG foreignObject engine:
       // Preserves exact fonts, exact layout, true shapes, and crystal-clear clarity!
+      // No cacheBust to ensure immediate reuse of memory-cached and base64 assets!
       const imgData = await toPng(pageEl, {
         pixelRatio: 2.5,
         backgroundColor: '#ffffff',
         width: 893,
         height: 1263,
         canvasWidth: 893 * 2.5,
-        canvasHeight: 1263 * 2.5,
-        cacheBust: true
+        canvasHeight: 1263 * 2.5
       });
 
       pdf.addImage(imgData, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
