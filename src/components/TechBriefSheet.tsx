@@ -1,5 +1,6 @@
 import React from 'react';
 import { TechnologyBriefData, BriefSection, ContentBlock } from '../types/technologyBrief';
+import { WatermarkStamp } from './WatermarkStamp';
 
 interface TechBriefSheetProps {
   data: TechnologyBriefData;
@@ -184,6 +185,12 @@ export const TechBriefSheet: React.FC<TechBriefSheetProps> = ({ data, scale = 1 
               boxSizing: 'border-box'
             }}
           >
+            {data.watermark?.enabled && (
+              <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
+                <WatermarkStamp watermark={data.watermark} variant="page" />
+              </div>
+            )}
+
             {/* TOP AREA: Header */}
             <div className="w-full">
               <div className="w-full relative">

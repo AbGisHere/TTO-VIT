@@ -36,6 +36,12 @@ export interface ContactInfo {
   website: string;
 }
 
+export interface BriefWatermark {
+  enabled: boolean;
+  text: string; // newlines split the stamp onto multiple lines
+  color: string;
+}
+
 export interface TechnologyBriefData {
   id?: string;
   techId: string;
@@ -57,6 +63,7 @@ export interface TechnologyBriefData {
   updatedAt?: any;
   createdByEmail?: string;
   pdfUrl?: string;
+  watermark?: BriefWatermark;
   published: boolean;
 }
 

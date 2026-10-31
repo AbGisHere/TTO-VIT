@@ -5,6 +5,7 @@ import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { TechnologyBriefData } from '../types/technologyBrief';
 import { sampleBriefData } from '../data/sampleBrief';
 import { TechBriefSheet } from '../components/TechBriefSheet';
+import { WatermarkStamp } from '../components/WatermarkStamp';
 import { exportBriefToPdf } from '../utils/pdfExport';
 import { useAuth } from '../context/AuthContext';
 import { PageBanner } from '../components/Brand';
@@ -204,7 +205,12 @@ export const TechBriefCatalog: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredBriefs.map(brief => (
                 <SpotlightCard key={brief.techId} theme="light" spotlightColor="rgba(92,225,230,0.35)" className="!rounded-2xl !p-0 h-full">
-                  <div className="flex flex-col h-full">
+                  <div className="relative flex flex-col h-full">
+                    {brief.watermark?.enabled && (
+                      <div className="absolute right-4 top-14 z-10">
+                        <WatermarkStamp watermark={brief.watermark} variant="card" />
+                      </div>
+                    )}
                     <div className="px-6 pt-6 flex items-center justify-between gap-2">
                       <div className="h-1 w-12 bg-gold-400 rounded-full" />
                       {signedIn && (
@@ -250,7 +256,11 @@ export const TechBriefCatalog: React.FC = () => {
                           </button>
                           <div className="flex items-center gap-1">
                             {isTbAdmin && (
-                              <Link to="/upload-tb" className="p-2 text-slate-400 hover:text-navy-900  transition" title="Edit in Brief Builder">
+                              <Link
+                                to={brief.id ? `/upload-tb?id=${brief.id}` : '/upload-tb'}
+                                className="p-2 text-slate-400 hover:text-navy-900  transition"
+                                title="Edit in Brief Builder"
+                              >
                                 <Edit3 className="w-4 h-4" />
                               </Link>
                             )}
