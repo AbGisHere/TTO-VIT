@@ -1,0 +1,61 @@
+rules_version = '2';
+
+// Rules for the `tto-portal` Firestore database only (the default database belongs to other apps).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null && request.auth.token.email != null;
+    }
+
+    function email() {
+      return request.auth.token.email.lower();
+    }
+
+    // Keep in sync with src/utils/admins.ts and storage.rules.
+    function isMasterAdmin() {
+      return signedIn() && email() in ['abg.592006@gmail.com', 'tto@vit.ac.in', 'manish.k@vit.ac.in'];
+    }
+
+    function isTbAdmin() {
+      return isMasterAdmin() ||
+        (signedIn() && exists(/databases/$(database)/documents/tto_admins/$(email())));
+    }
+
+    function isVitAccount() {
+      return signedIn() && email().matches('.*@vit(student)?[.]ac[.]in');
+    }
+
+    // TB admin grants, keyed by lowercased email. Users may check their own entry.
+    match /tto_admins/{adminEmail} {
+      allow get: if signedIn() && (adminEmail == email() || isMasterAdmin());
+      allow list: if isMasterAdmin();
+      allow write: if isMasterAdmin();
+    }
+
+    // Profile records. No role field: roles come only from the lists above.
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isMasterAdmin());
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && !('role' in request.resource.data)
+        && request.resource.data.email == email();
+      allow delete: if isMasterAdmin();
+    }
+
+    match /technology_briefs/{briefId} {
+      allow read: if true;
+      allow create, update, delete: if isTbAdmin();
+    }
+
+    match /submissions/{submissionId} {
+      allow create: if (isVitAccount() || isMasterAdmin())
+        && request.resource.data.submittedByUid == request.auth.uid;
+      allow read: if isMasterAdmin() || (signedIn() && resource.data.submittedByUid == request.auth.uid);
+      allow update, delete: if isMasterAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,73 @@
+rules_version = '2';
+
+// Shared bucket for innovation-vit. The resumes/ and templates/ blocks belong to the
+// recruitment portal and are copied verbatim from the live ruleset; only the TTO blocks are new.
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ---- TTO website ----
+    // Storage rules can only read the (default) Firestore database, not `tto-portal`, so TB
+    // admins are recognised by the `ttoAdmin` token claim that functions/index.js keeps in sync
+    // with tto_admins. Master admin list: keep in sync with src/utils/admins.ts and firestore.rules.
+    function ttoCanUpload() {
+      return request.auth != null && request.auth.token.email != null && (
+        request.auth.token.email.lower() in ['abg.592006@gmail.com', 'tto@vit.ac.in', 'manish.k@vit.ac.in'] ||
+        request.auth.token.ttoAdmin == true
+      );
+    }
+
+    match /tech_briefs/{allPaths=**} {
+      allow read: if true;
+      allow create, update: if ttoCanUpload()
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if false;
+    }
+
+    match /tech-briefs-pdf/{fileName} {
+      allow read: if true;
+      allow create, update: if ttoCanUpload()
+        && request.resource.size < 20 * 1024 * 1024
+        && request.resource.contentType == 'application/pdf';
+      allow delete: if false;
+    }
+
+    // ---- Recruitment portal (unchanged) ----
+    match /resumes/{fileName} {
+      // Any signed-in staff member (manager or reviewer) may download.
+      // Storage rules cannot join Firestore, so per-assignment restriction is
+      // enforced by the application docs that expose these paths.
+      allow read: if request.auth != null;
+
+      // Public applicants upload their resume during submission.
+      allow create: if request.resource.size < 5 * 1024 * 1024
+        && (
+          request.resource.contentType == 'application/pdf'
+          || request.resource.contentType == 'application/msword'
+          || request.resource.contentType == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        );
+
+      allow update, delete: if false;
+    }
+
+    match /templates/{fileName} {
+      // Anyone can read templates (public download link for applicants).
+      allow read: if true;
+
+      // Only authenticated managers may upload/replace templates.
+      allow create, update: if request.auth != null
+        && request.resource.size < 10 * 1024 * 1024
+        && (
+          request.resource.contentType == 'application/msword'
+          || request.resource.contentType == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+          || request.resource.contentType == 'application/pdf'
+        );
+
+      allow delete: if false;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

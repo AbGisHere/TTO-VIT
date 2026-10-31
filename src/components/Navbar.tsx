@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { canSubmitToTto } from '../utils/access';
-import { LogIn, LogOut, FileText, ClipboardList, Lightbulb, PlusCircle } from 'lucide-react';
+import { LogIn, LogOut, FileText, ClipboardList, Lightbulb, PlusCircle, ShieldCheck } from 'lucide-react';
 import { UserRole } from '../types/technologyBrief';
 
 const roleLabel: Record<UserRole, string> = {
@@ -34,14 +34,15 @@ const Avatar: React.FC<{ name: string; src?: string }> = ({ name, src }) => {
 };
 
 export const Navbar: React.FC = () => {
-  const { user, signInWithGoogle, logout, isTbAdmin } = useAuth();
+  const { user, signInWithGoogle, logout, isTbAdmin, isMasterAdmin } = useAuth();
   const { pathname } = useLocation();
 
   const links = [
     { to: '/tb', label: 'Technology Briefs', icon: FileText, show: true },
     { to: '/problem-statements', label: 'Problem Statements', icon: ClipboardList, show: canSubmitToTto(user) },
     { to: '/submit', label: 'Submit an Idea', icon: Lightbulb, show: canSubmitToTto(user) },
-    { to: '/upload-tb', label: 'Create Brief', icon: PlusCircle, show: isTbAdmin }
+    { to: '/upload-tb', label: 'Create Brief', icon: PlusCircle, show: isTbAdmin },
+    { to: '/admins', label: 'Admins', icon: ShieldCheck, show: isMasterAdmin }
   ].filter(l => l.show);
 
   const linkClass = (to: string) =>

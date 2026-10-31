@@ -2,6 +2,7 @@ import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { getFunctions } from 'firebase/functions';
 
 const firebaseConfig = {
   projectId: "innovation-vit",
@@ -22,6 +23,8 @@ googleProvider.setCustomParameters({
   prompt: 'select_account'
 });
 
-export const db = getFirestore(app);
+// TTO uses its own named database so its rules don't collide with other innovation-vit apps.
+export const db = getFirestore(app, 'tto-portal');
 export const storage = getStorage(app);
+export const functions = getFunctions(app, 'asia-south1');
 export default app;

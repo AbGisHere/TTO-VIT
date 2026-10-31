@@ -13,5 +13,24 @@
         "destination": "/index.html"
       }
     ]
-  }
+  },
+  "firestore": [
+    {
+      "database": "tto-portal",
+      "rules": "firestore.rules"
+    }
+  ],
+  "storage": [
+    {
+      "bucket": "innovation-vit.firebasestorage.app",
+      "rules": "storage.rules"
+    }
+  ],
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "tto",
+      "runtime": "nodejs22"
+    }
+  ]
 }

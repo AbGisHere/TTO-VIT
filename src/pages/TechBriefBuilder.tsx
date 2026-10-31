@@ -32,88 +32,126 @@ import {
   FileCode2
 } from 'lucide-react';
 
-// WYSIWYG Rich Bullet Item Editor with Instant Color & Bold Toolbar
+const SWATCHES = ['#000000', '#ff3131', '#1d4ed8', '#047857', '#7c3aed', '#c2410c', '#64748b'];
+
+// Shared formatting toolbar for bullet items and text blocks. Commands act on the current
+// selection inside `editorRef`; the last selection is saved so the colour picker (which
+// steals focus) can still apply to it.
+const FormatToolbar: React.FC<{
+  editorRef: React.RefObject<HTMLDivElement>;
+  onChange: (html: string) => void;
+}> = ({ editorRef, onChange }) => {
+  const savedRange = useRef<Range | null>(null);
+  const [customColor, setCustomColor] = useState('#ff3131');
+
+  useEffect(() => {
+    const save = () => {
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount && editorRef.current?.contains(sel.anchorNode)) {
+        savedRange.current = sel.getRangeAt(0).cloneRange();
+      }
+    };
+    document.addEventListener('selectionchange', save);
+    return () => document.removeEventListener('selectionchange', save);
+  }, [editorRef]);
+
+  const run = (...commands: [string, string?][]) => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    const sel = window.getSelection();
+    if (savedRange.current && sel && !editor.contains(sel.anchorNode)) {
+      editor.focus();
+      sel.removeAllRanges();
+      sel.addRange(savedRange.current);
+    }
+    commands.forEach(([cmd, value]) => document.execCommand(cmd, false, value));
+    onChange(editor.innerHTML);
+  };
+
+  const btn = 'px-2 py-0.5 rounded hover:bg-slate-100 border border-slate-300 text-slate-800';
+  const keep = (fn: () => void) => (e: React.MouseEvent) => { e.preventDefault(); fn(); };
+
+  return (
+    <div className="flex flex-wrap items-center gap-1.5 pb-1 border-b border-slate-100 text-xs">
+      <button
+        type="button"
+        onMouseDown={keep(() => run(['bold'], ['foreColor', '#ff3131']))}
+        className="px-2.5 py-0.5 rounded font-extrabold bg-red-50 hover:bg-red-100 border border-red-300 text-[#ff3131] flex items-center gap-1 shadow-2xs transition"
+        title="Turn selected word(s) into Canva Bold Red Highlight"
+      >
+        <span className="w-2.5 h-2.5 rounded-full bg-[#ff3131]" /> Bold Red
+      </button>
+      <button type="button" onMouseDown={keep(() => run(['bold']))} className={`${btn} font-bold`} title="Bold">
+        B
+      </button>
+      <button type="button" onMouseDown={keep(() => run(['italic']))} className={`${btn} italic font-serif`} title="Italic">
+        I
+      </button>
+      <button type="button" onMouseDown={keep(() => run(['underline']))} className={`${btn} underline`} title="Underline">
+        U
+      </button>
+
+      <span className="w-px h-4 bg-slate-200 mx-0.5" />
+
+      {SWATCHES.map(c => (
+        <button
+          key={c}
+          type="button"
+          onMouseDown={keep(() => run(['foreColor', c]))}
+          className="w-4 h-4 rounded-full border border-slate-300 hover:scale-110 transition"
+          style={{ backgroundColor: c }}
+          title={`Colour ${c}`}
+        />
+      ))}
+      <label className="relative flex items-center gap-1 px-1.5 py-0.5 rounded border border-slate-300 hover:bg-slate-100 cursor-pointer" title="Pick any colour">
+        <Palette className="w-3 h-3 text-slate-500" />
+        <span className="w-3 h-3 rounded-sm border border-slate-300" style={{ backgroundColor: customColor }} />
+        <input
+          type="color"
+          value={customColor}
+          onChange={e => {
+            setCustomColor(e.target.value);
+            run(['foreColor', e.target.value]);
+          }}
+          className="absolute inset-0 opacity-0 cursor-pointer"
+        />
+      </label>
+
+      <button
+        type="button"
+        onMouseDown={keep(() => run(['removeFormat'], ['foreColor', '#000000']))}
+        className="px-2 py-0.5 rounded text-[11px] hover:bg-slate-100 border border-slate-200 text-slate-500"
+        title="Reset to regular black text"
+      >
+        Reset
+      </button>
+      <span className="text-[10px] text-slate-400 ml-auto italic">Select text, then format</span>
+    </div>
+  );
+};
+
+// Keeps a contentEditable in sync with external HTML without resetting the caret while typing.
+const useEditableHtml = (html: string) => {
+  const editorRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (editorRef.current && editorRef.current.innerHTML !== html) {
+      editorRef.current.innerHTML = html || '';
+    }
+  }, [html]);
+  return editorRef;
+};
+
+// WYSIWYG Rich Bullet Item Editor
 const RichBulletItem: React.FC<{
   initialHtml: string;
   onChange: (html: string) => void;
   onRemove: () => void;
 }> = ({ initialHtml, onChange, onRemove }) => {
-  const editorRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (editorRef.current && editorRef.current.innerHTML !== initialHtml) {
-      editorRef.current.innerHTML = initialHtml || '';
-    }
-  }, [initialHtml]);
-
-  const applyRedHighlight = () => {
-    document.execCommand('bold', false);
-    document.execCommand('foreColor', false, '#ff3131');
-    if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
-    }
-  };
-
-  const applyBold = () => {
-    document.execCommand('bold', false);
-    if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
-    }
-  };
-
-  const applyUnderline = () => {
-    document.execCommand('underline', false);
-    if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
-    }
-  };
-
-  const clearFormatting = () => {
-    document.execCommand('removeFormat', false);
-    document.execCommand('foreColor', false, '#000000');
-    if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
-    }
-  };
+  const editorRef = useEditableHtml(initialHtml);
 
   return (
     <div className="flex flex-col gap-1 p-2 bg-white rounded-lg border border-slate-200 shadow-2xs group focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-400">
-      {/* Quick formatting toolbar */}
-      <div className="flex items-center gap-1.5 pb-1 border-b border-slate-100 text-xs">
-        <button
-          type="button"
-          onMouseDown={(e) => { e.preventDefault(); applyRedHighlight(); }}
-          className="px-2.5 py-0.5 rounded font-extrabold bg-red-50 hover:bg-red-100 border border-red-300 text-[#ff3131] flex items-center gap-1 shadow-2xs transition"
-          title="Turn selected word(s) into Canva Bold Red Highlight"
-        >
-          <span className="w-2.5 h-2.5 rounded-full bg-[#ff3131]" /> 🔴 Bold Red Highlight
-        </button>
-        <button
-          type="button"
-          onMouseDown={(e) => { e.preventDefault(); applyBold(); }}
-          className="px-2 py-0.5 rounded font-bold hover:bg-slate-100 border border-slate-300 text-slate-800"
-          title="Bold selected text"
-        >
-          B
-        </button>
-        <button
-          type="button"
-          onMouseDown={(e) => { e.preventDefault(); applyUnderline(); }}
-          className="px-2 py-0.5 rounded underline hover:bg-slate-100 border border-slate-300 text-slate-800"
-          title="Underline selected text"
-        >
-          <u>U</u>
-        </button>
-        <button
-          type="button"
-          onMouseDown={(e) => { e.preventDefault(); clearFormatting(); }}
-          className="px-2 py-0.5 rounded text-[11px] hover:bg-slate-100 border border-slate-200 text-slate-500"
-          title="Reset to regular black text"
-        >
-          Reset
-        </button>
-        <span className="text-[10px] text-slate-400 ml-auto italic">Select text & click Bold Red</span>
-      </div>
+      <FormatToolbar editorRef={editorRef} onChange={onChange} />
 
       <div className="flex items-start gap-2">
         <span className="text-slate-500 font-bold text-sm mt-0.5">•</span>
@@ -137,6 +175,32 @@ const RichBulletItem: React.FC<{
           &times;
         </button>
       </div>
+    </div>
+  );
+};
+
+// WYSIWYG Rich Text Paragraph Editor
+const RichTextBlock: React.FC<{
+  initialHtml: string;
+  onChange: (html: string) => void;
+}> = ({ initialHtml, onChange }) => {
+  const editorRef = useEditableHtml(initialHtml);
+
+  return (
+    <div className="flex flex-col gap-1 p-2 bg-white rounded-lg border border-slate-200 shadow-2xs focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-400">
+      <FormatToolbar editorRef={editorRef} onChange={onChange} />
+      <div
+        ref={editorRef}
+        contentEditable
+        suppressContentEditableWarning
+        data-placeholder="Enter paragraph text (newspaper justified alignment will be applied)..."
+        onInput={() => {
+          if (editorRef.current) {
+            onChange(editorRef.current.innerHTML);
+          }
+        }}
+        className="min-h-[72px] text-xs leading-relaxed whitespace-pre-wrap focus:outline-none bg-slate-50/50 p-1.5 rounded text-black empty:before:content-[attr(data-placeholder)] empty:before:text-slate-400"
+      />
     </div>
   );
 };
@@ -838,14 +902,9 @@ export const TechBriefBuilder: React.FC = () => {
 
                         {/* Text Paragraph Block Editor */}
                         {block.type === 'text' && (
-                          <textarea
-                            rows={3}
-                            value={block.content || ''}
-                            onChange={e =>
-                              updateBlock(sec.id, block.id, { content: e.target.value })
-                            }
-                            className="w-full text-xs border border-slate-200 rounded p-2 bg-white focus:outline-navy-700"
-                            placeholder="Enter paragraph text (newspaper justified alignment will be applied)..."
+                          <RichTextBlock
+                            initialHtml={block.content || ''}
+                            onChange={html => updateBlock(sec.id, block.id, { content: html })}
                           />
                         )}
 

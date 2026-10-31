@@ -55,3 +55,6 @@ coverage/
 .nyc_output/
 *.tsbuildinfo
 sample_assets/
+
+# Cloud Functions
+functions/node_modules/
