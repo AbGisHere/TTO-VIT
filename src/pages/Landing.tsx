@@ -5,7 +5,6 @@ import { ArrowRight, ArrowUpRight, Lock, LogIn, Mail, Phone, Globe } from 'lucid
 import { db } from '../firebase/config';
 import { useAuth } from '../context/AuthContext';
 import { canSubmitToTto } from '../utils/access';
-import { sampleBriefData } from '../data/sampleBrief';
 import { TechnologyBriefData } from '../types/technologyBrief';
 import { problemStatements } from '../data/problemStatements';
 import BlurText from '../components/reactbits/BlurText';
@@ -85,13 +84,13 @@ const trlBands = [
 export const Landing: React.FC = () => {
   const { user, signInWithGoogle } = useAuth();
   const mayContribute = canSubmitToTto(user);
-  const [briefs, setBriefs] = useState<TechnologyBriefData[]>([sampleBriefData]);
+  const [briefs, setBriefs] = useState<TechnologyBriefData[]>([]);
   const signIn = () => signInWithGoogle().catch(() => undefined);
 
   useEffect(() => {
     getDocs(query(collection(db, 'technology_briefs'), orderBy('createdAt', 'desc'), limit(3)))
       .then(snap => {
-        if (!snap.empty) setBriefs(snap.docs.map(d => ({ id: d.id, ...(d.data() as TechnologyBriefData) })));
+        setBriefs(snap.docs.map(d => ({ id: d.id, ...(d.data() as TechnologyBriefData) })));
       })
       .catch(() => undefined);
   }, []);

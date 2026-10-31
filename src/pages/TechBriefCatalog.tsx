@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { db } from '../firebase/config';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { TechnologyBriefData } from '../types/technologyBrief';
-import { sampleBriefData } from '../data/sampleBrief';
 import { TechBriefSheet } from '../components/TechBriefSheet';
 import { WatermarkStamp } from '../components/WatermarkStamp';
 import { exportBriefToPdf } from '../utils/pdfExport';
@@ -37,7 +36,7 @@ const TrlMeter: React.FC<{ level: number }> = ({ level }) => (
 export const TechBriefCatalog: React.FC = () => {
   const { user, isTbAdmin, signInWithGoogle } = useAuth();
   const signedIn = !!user;
-  const [briefs, setBriefs] = useState<TechnologyBriefData[]>([sampleBriefData]);
+  const [briefs, setBriefs] = useState<TechnologyBriefData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDomain, setSelectedDomain] = useState('All');
@@ -70,11 +69,10 @@ export const TechBriefCatalog: React.FC = () => {
       try {
         const snap = await getDocs(query(collection(db, 'technology_briefs'), orderBy('createdAt', 'desc')));
         setBriefs(
-          snap.empty ? [sampleBriefData] : snap.docs.map(d => ({ id: d.id, ...(d.data() as TechnologyBriefData) }))
+          snap.docs.map(d => ({ id: d.id, ...(d.data() as TechnologyBriefData) }))
         );
       } catch (err) {
-        console.warn('Firestore fetch error, using local template:', err);
-        setBriefs([sampleBriefData]);
+        console.warn('Firestore fetch error:', err);
       } finally {
         setLoading(false);
       }
@@ -257,7 +255,7 @@ export const TechBriefCatalog: React.FC = () => {
                           <div className="flex items-center gap-1">
                             {isTbAdmin && (
                               <Link
-                                to={brief.id ? `/upload-tb?id=${brief.id}` : '/upload-tb'}
+                                to={`/upload-tb?id=${brief.id}`}
                                 className="p-2 text-slate-400 hover:text-navy-900  transition"
                                 title="Edit in Brief Builder"
                               >

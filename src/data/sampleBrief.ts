@@ -4,7 +4,6 @@ export const sampleBriefData: TechnologyBriefData = {
   techId: '2024VITTTO73',
   title: 'Natural Vitamin B12 Fortification in Fermented Foods',
   titleBannerBgColor: '#7ed957',
-  pdfUrl: '/sample-briefs/2024VITTTO73_Natural_Vitamin_B12_Fortification_in_Fermented_Foods.pdf',
   domains: ['Food Biotechnology', 'Fermentation Microbiology', 'Nutraceutical Engineering'],
   applications: ['Staple Batter Enrichment', 'Bakery Products', 'Dairy Fermentation'],
   trlLevel: 5,
